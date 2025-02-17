@@ -1,0 +1,14 @@
+# virtual environment
+venv/
+
+# python related files
+**/__pycache__/
+
+# created annarchy folder
+annarchy*/
+
+# connection pattern
+**/connections*/
+
+# folder with saved results
+Results/
