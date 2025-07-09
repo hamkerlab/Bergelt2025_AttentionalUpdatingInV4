@@ -11,7 +11,7 @@ Main script for evaluation
 import os
 import sys
 # import files from this folder
-from processData import getTrialsPerAP, extract_eyepos, extract_LIPdata, extract_onsetPos
+from processData import getTrialsPerAP, getBarposAndOnsetCombinations, extract_eyepos, extract_LIPdata, extract_onsetPos
 from plotting import plot_setup, plot_revCorrelation, plot_actLIP, plot_actV4L4, plot_actAll, plot_ratesOverTime
 # parameters
 from parameters.params_general import params
@@ -32,6 +32,9 @@ if __name__ == "__main__":
 
     print("get trials per attention position")
     trialsPerAP = getTrialsPerAP()
+
+    print("get all bar onset and position combinations")
+    getBarposAndOnsetCombinations()
 
     print("extract LIP data")
     extract_LIPdata()

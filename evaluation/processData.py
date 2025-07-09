@@ -113,6 +113,58 @@ def getTrialsPerAP():
     return trialsPerAP
 
 
+def getBarposAndOnsetCombinations():
+    '''
+    get all combinations of bar onset and position separated by attention position
+
+    return: onsetPosComb -- dictionary with trial ids according to attention position
+    '''
+
+    trialsPerAP = load_dict_from_hdf5(f"../{params['SetupDir']}/trialsPerAP.hdf5")
+
+    # all possible horizontal positions of bar
+    pos_h = np.arange(-params['VF_Deg'][0]/2, params['VF_Deg'][0]/2+params['range_h'], params['range_h'])
+    # all possible onsets of bar
+    onsets = np.arange(params['range_t'][0], params['range_t'][1]+1, params['range_t'][2])
+
+    results = {}
+    # for each attention position seperately
+    for AP, subtrials in trialsPerAP.items():
+        ## extract data in parallel
+        print(f"extract data for AP {AP}")    
+        runParallel = [(f"../{params['SetupDir']}/{int(trial)}/", params['tEnd']+1, False) for trial in subtrials]
+        # Step 1: Init multiprocessing.Pool()
+        pool = mp.Pool(min(mp.cpu_count()-1, params['runInParallel'], len(runParallel)))
+        # Step 2: `pool.apply` the `add()`
+        subresults = pool.starmap(getBarposAndOnset, runParallel)
+        # Step 3: Don't forget to close
+        pool.close()
+
+        # init
+        above = np.zeros((len(pos_h), len(onsets)))
+        below = np.zeros((len(pos_h), len(onsets)))
+
+        # go through all trials and add occurrence
+        for res in subresults:
+            for data in res.values():
+                idx_onset = np.where(onsets==data['onset'])
+                idx_pos = np.where(pos_h==data['pos'][0])
+                if data['pos'][1] == -params['range_v']:
+                    below[idx_pos, idx_onset] += 1
+                else:
+                    above[idx_pos, idx_onset] += 1                
+
+        ## print results
+        print(f"{AP}, above: amount between {np.min(above)} and {np.max(above)}")
+        print(f"{AP}, below: amount between {np.min(below)} and {np.max(below)}")
+
+        ## add results
+        results[str(AP)] = {'above': above, 'below': below}
+
+    ## save for further usage
+    save_dict_to_hdf5(results, f"../{params['SetupDir']}/barPosOnsetCombimations.hdf5")
+
+
 def extract_eyepos():
     '''
     mean over all eye trajectories generated in simulations
@@ -143,7 +195,7 @@ def extract_LIPdata_single(AP_str, trial, layers):
     '''
     
     # convert string into array
-    AP = np.fromstring(AP_str [1:-1], dtype=float, sep=' ')
+    AP = np.fromstring(AP_str[1:-1], dtype=float, sep=' ')
 
     # get rates of current trial
     fn = f"../{params['ResultDir']}/trials/{trial}/Rates/dict_rates.hdf5"

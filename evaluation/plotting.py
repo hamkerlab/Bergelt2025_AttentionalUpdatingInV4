@@ -237,7 +237,7 @@ def plot_actLIP():
     ST = FP + saccade                       # saccade target
     # timesteps aligned to saccade onset
     timesteps = np.linspace(0, params['tEnd'], params['tEnd']+1, dtype='int') - params['saccOnset']
-    ext_rates = [timesteps[0], timesteps[-1], params['VF_Deg'][0]/2, -params['VF_Deg'][0]/2]
+    ext_rates = [-params['VF_Deg'][0]/2, params['VF_Deg'][0]/2, timesteps[-1], timesteps[0]]
 
     # extract LIP data (see processData.extract_LIPdata())
     ratesPerAP = load_dict_from_hdf5(f"../{params['ResultDir']}/extractedData/LIPdata.hdf5")
@@ -247,71 +247,74 @@ def plot_actLIP():
 
     # one figure for each attention position
     for AP_str, rates in ratesPerAP.items():
-        fig = plt.figure(figsize=(24, 6.9))
-        gs = GridSpec(1, 10)
-        plt.subplots_adjust(left=0.05, right=0.99, top=0.9, bottom=0.1, wspace=0.0, hspace=0.2)
+        fig = plt.figure(figsize=(24, 9))
+        gs = GridSpec(4, 9)
+        plt.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.1, wspace=0.3, hspace=0.1)
 
-        ## setup
-        ax = plt.subplot(gs[0, 0])
-        # fixation point
-        plt.scatter(FP[1], FP[0], marker='o', s=200, color='black')
-        plt.text(FP[1], FP[0]-2, 'FP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='bottom')
-        # saccade target
-        plt.scatter(ST[1], ST[0], marker='o', edgecolor='black', facecolor='white', s=200)
-        plt.scatter(ST[1], ST[0], marker='o', edgecolor='black', facecolor='black', s=20)
-        plt.text(ST[1], ST[0]+2, 'ST', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='top')
-        # attention position
+        # (remapped) attention position
         # convert string into array
-        AP = np.fromstring(AP_str [1:-1], dtype=float, sep=' ')
-        plt.scatter(AP[1], AP[0], marker='o', s=200, color='black')
-        plt.text(AP[1], AP[0]+2, 'AP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='top')
-        # remapped attention position
+        AP = np.fromstring(AP_str[1:-1], dtype=float, sep=' ')
         RAP = AP - saccade
-        plt.scatter(RAP[1], RAP[0], marker='o', s=200, color='gray')
-        plt.text(RAP[1], RAP[0]-2, 'RAP', color='gray', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='bottom')
-        xmin = min(params['VF_Deg'][1], FP[1], ST[1], AP[1], RAP[1])
-        xmax = max(0, FP[1], ST[1], AP[1], RAP[1])
-        # saccade
-        plt.arrow(FP[1], FP[0], saccade[1], saccade[0], color='black', head_width=2, head_length=1.5, length_includes_head=True)
-        ax.set_aspect(3)
-        ax.set_xlim((xmax+10, xmin-10))
-        ax.set_ylim((ext_rates[2], ext_rates[3]))
-        ax.get_xaxis().set_visible(False)
-        for pos in ['top', 'right', 'bottom']:
-            ax.spines[pos].set_visible(False)
-        plt.ylabel('Horizontal position (deg)', fontsize=params['fontsizes']['axes'], labelpad=10)
-        for label in ax.get_yticklabels():
-            label.set_fontsize(params['fontsizes']['axes'])
-            
-        ## activity from LIP to V4, Layer 4
+        # axes limits for setup plot
+        ymin = min(params['VF_Deg'][1], FP[1], ST[1], AP[1], RAP[1])
+        ymax = max(0, FP[1], ST[1], AP[1], RAP[1])
+        
         for i, (name, rates_mean) in enumerate(rates.items()):
-            ax = plt.subplot(gs[0, 1+i*3:4+i*3])
+
+            ## setup
+            ax = plt.subplot(gs[3, i*3:3+i*3])
+            # fixation point
+            plt.scatter(FP[0], FP[1], marker='o', s=200, color='black')
+            plt.text(FP[0], FP[1]+2, 'FP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='top')
+            # saccade target
+            plt.scatter(ST[0], ST[1], marker='o', edgecolor='black', facecolor='white', s=200)
+            plt.scatter(ST[0], ST[1], marker='o', edgecolor='black', facecolor='black', s=20)
+            plt.text(ST[0], ST[1]+2, 'ST', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='top')
+            # attention position            
+            plt.scatter(AP[0], AP[1], marker='o', s=200, color='black')
+            plt.text(AP[0], AP[1]-2, 'AP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='bottom')
+            # remapped attention position
+            plt.scatter(RAP[0], RAP[1], marker='o', s=200, color='gray')
+            plt.text(RAP[0], RAP[1]-2, 'RAP', color='gray', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='bottom')
+            # saccade
+            plt.arrow(FP[0], FP[1], saccade[0], saccade[1], color='black', head_width=2, head_length=1.5, length_includes_head=True)
+            # ax.set_aspect(1/3)
+            ax.set_xlim((ext_rates[0], ext_rates[1]))
+            ax.set_ylim((ymax+10, ymin-10))
+            ax.get_yaxis().set_visible(False)
+            for pos in ['top', 'right', 'left']:
+                ax.spines[pos].set_visible(False)
+            plt.xlabel('Horizontal position (deg)', fontsize=params['fontsizes']['axes'], labelpad=10)
+            for label in ax.get_xticklabels():
+                label.set_fontsize(params['fontsizes']['axes'])
+            
+            ## activity from LIP to V4, Layer 4
+            ax = plt.subplot(gs[:3, i*3:(i+1)*3])
             plt.title(f'normalized\n{name}', fontsize=params['fontsizes']['title'])
             # plot spatial attention of V4 for fixed vertical neuron
             # normalize and remove noise (=rate from outer neurons)
             r = (rates_mean/np.max(rates_mean)).T
             noise = np.max(r[np.append(range(10), range(-10,0))], axis=0)
             r[np.where(r<=noise)] = 0
-            plt.imshow(r, aspect='auto', cmap='myReds', extent=ext_rates)
-            ax.get_yaxis().set_visible(False)
+            plt.imshow(r.T, aspect='auto', cmap='myReds', extent=ext_rates)
+            plt.grid()
+            ax.get_xaxis().set_visible(False)
             plt.clim(0, 1)
-
             # encoded (R)AP over time
-            plt.plot(timesteps, (AP-ep)[:, 0], color='black')
-            plt.plot(timesteps, (RAP-ep)[:, 0], color='gray', linestyle='--')
-
+            plt.plot((AP-ep)[:, 0], timesteps, color='black')
+            plt.plot((RAP-ep)[:, 0], timesteps, color='gray', linestyle='--')
             # adjust plot
-            if i==1:
-                plt.xlabel('Time relative to saccade onset (ms)', fontsize=params['fontsizes']['axes'], labelpad=15)
-            for label in ax.get_xticklabels():
-                label.set_fontsize(params['fontsizes']['axes'])
-            if i < 2:
-                # trick to make imshows equally sized (due to colorbar)
-                cbar = plt.colorbar(shrink=0)
-                cbar.set_ticks([])
-            else:
-                cbar = plt.colorbar()
-                cbar.ax.tick_params(labelsize=params['fontsizes']['axes'])
+            if i==0:
+                plt.ylabel('Time relative to saccade onset (ms)', fontsize=params['fontsizes']['axes'], labelpad=15)
+                for label in ax.get_yticklabels():
+                    label.set_fontsize(params['fontsizes']['axes'])
+            else:                
+                ax.set_yticklabels([])
+
+        # add colorbar
+        cbaxes = fig.add_axes([0.97, 0.3, 0.01, 0.6])  # position for the colorbar
+        cbar = plt.colorbar(cax=cbaxes)
+        cbar.ax.tick_params(labelsize=params['fontsizes']['axes'])
 
         # plt.show()
         plt.savefig(f"../{params['ResultDir']}/figs/Fig3_{AP}.png", dpi=300)
