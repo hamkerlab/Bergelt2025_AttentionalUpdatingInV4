@@ -1,7 +1,7 @@
 # Bergelt2025_AttentionalUpdatingInV4
 
 The repository contains all relevant scripts to reproduce the results and figures published in the article
-"Perisaccadic attentional updating in Area V4: A neuro-computational approach" by J. Bergelt and F. H. Hamker, submitted in Journal in Neuroscience
+"Perisaccadic attentional updating in Area V4: A neuro-computational approach" by J. Bergelt and F. H. Hamker, submitted in European Journal in Neuroscience
 
 The source code is implemented in Python 3.10.  
 The simulations were done with the neural simulator ANNarchy 4.8.
