@@ -61,7 +61,7 @@ def run(number):
     
 
     # attention position in degree and horizontal x vertical
-    # random out of 4 possible postions: above/below FP/ST
+    # random out of 4 possible positions: above/below FP/ST
     # [0, 0] --> below ST, [0, 1] --> below FP, [1, 0] --> above ST, [1, 1] --> above FP
     above_FP = np.random.randint(0, 2, 2)
     dist_v = -params['range_v'] if above_FP[0] else params['range_v']
@@ -133,9 +133,9 @@ def run(number):
     saveOutput(output, saveDir)
 
 
-#######################
-#### Main programm ####
-#######################
+######################
+#### Main program ####
+######################
 if __name__ == "__main__":
 
     # id of trials to simulate

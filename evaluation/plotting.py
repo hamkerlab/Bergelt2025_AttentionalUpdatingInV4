@@ -34,7 +34,7 @@ params.update(params_plotting)
 
 def plot_setup(trial):
     '''
-    Figure 1:
+    Figure 2:
     spatial and temporal layout of given trial
 
     params: trial -- number of trial
@@ -49,7 +49,7 @@ def plot_setup(trial):
     FP = loadedSetup['FP']                      # fixation point
     ST = loadedSetup['ST']                      # saccade target
     AP = loadedSetup['AP']                      # attention position
-    RAP = AP - np.array(params['saccade'])      # remapped attenion position
+    RAP = AP - np.array(params['saccade'])      # remapped attention position
     start_timestep = loadedSetup['t_start']     # start of simulation
     end_timestep = loadedSetup['t_end']         # end of simulation
     duration = end_timestep-start_timestep+1    # total duration of simulation
@@ -75,7 +75,7 @@ def plot_setup(trial):
             plt.scatter(FP[0], FP[1], marker='o', facecolor='black', s=700)
             plt.text(FP[0], FP[1]-1, 'FP', fontsize=params['fontsizes']['setup_text'], horizontalalignment='center', verticalalignment='bottom')
         elif 0 <= t <= sacDur:
-            # onging saccade towards ST
+            # ongoing saccade towards ST
             plt.scatter(ST[0], ST[1], marker='o', edgecolor='black', facecolor='white', s=700)
             plt.scatter(ST[0], ST[1], marker='o', edgecolor='black', facecolor='black', s=70)
             plt.text(ST[0], ST[1]-1, 'ST', fontsize=params['fontsizes']['setup_text'], horizontalalignment='center', verticalalignment='bottom')
@@ -118,24 +118,24 @@ def plot_setup(trial):
 
         plt.tight_layout()
         # plt.show()
-        plt.savefig(f"../{params['ResultDir']}/figs/Fig1A_trial={trial}_t={t:0>3d}.svg", dpi=300)
+        plt.savefig(f"../{params['ResultDir']}/figs/Fig2A_trial={trial}_t={t:0>3d}.svg", dpi=300)
         plt.close(fig)
 
 
     ## temporal
-    fig = plt.figure(figsize=(12, 9))
+    fig = plt.figure(figsize=(15, 9))
     ax = plt.gca()
 
     # eye position
     plt.plot(ep[:, 0], color='black', linewidth=2, label='eyepos x')
-    plt.text(start_timestep-end_timestep/10, ep[0, 0], 'Eye x', fontsize=params['fontsizes']['setup_axes'], horizontalalignment='left')
+    plt.text(start_timestep, ep[0, 0], 'Eye x', fontsize=params['fontsizes']['setup_axes'], horizontalalignment='right')
 
     # bars
     for b, bar in bars.items():
         t_start = np.argwhere(bar!=np.inf)[0][0]
         # print(t_start, bar[t_start])
         plt.plot([t_start, t_start], [-params['range_v'], -params['range_v']+params['saccade'][0]], color='gray', linewidth=2)
-    plt.text(start_timestep-end_timestep/10, -params['range_v'], 'Probes', fontsize=params['fontsizes']['setup_axes'], horizontalalignment='left')
+    plt.text(start_timestep, -params['range_v'], 'Probes', fontsize=params['fontsizes']['setup_axes'], horizontalalignment='right')
     # bar limits
     frame = plt.Rectangle([params['range_t'][0], -params['range_v']], params['range_t'][1]-params['range_t'][0], params['saccade'][0],
                           fill=False, linewidth=2, color='black')
@@ -162,7 +162,7 @@ def plot_setup(trial):
     ax.spines['bottom'].set_linewidth(3)
     
     # plt.show()
-    plt.savefig(f"../{params['ResultDir']}/figs/Fig1B_trial={trial}.svg")
+    plt.savefig(f"../{params['ResultDir']}/figs/Fig2B_trial={trial}.svg")
     plt.close(fig)
 
 def plot_setup_simple(attTask, AP, neuron, trick_colorbar=False):
@@ -226,7 +226,7 @@ def plot_setup_simple(attTask, AP, neuron, trick_colorbar=False):
 
 def plot_actLIP():
     '''
-    Figure 3, 7:
+    Figure 3 and 6:
     pot activity of projection from both LIP maps to V4L4 individually as well as their sum
     normalized over all runs, for each AP separately
     '''
@@ -247,9 +247,9 @@ def plot_actLIP():
 
     # one figure for each attention position
     for AP_str, rates in ratesPerAP.items():
-        fig = plt.figure(figsize=(24, 9))
+        fig = plt.figure(figsize=(25, 9))
         gs = GridSpec(4, 9)
-        plt.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.1, wspace=0.3, hspace=0.1)
+        plt.subplots_adjust(left=0.08, right=0.95, top=0.85, bottom=0.1, wspace=0.3, hspace=0.1)
 
         # (remapped) attention position
         # convert string into array
@@ -258,6 +258,12 @@ def plot_actLIP():
         # axes limits for setup plot
         ymin = min(params['VF_Deg'][1], FP[1], ST[1], AP[1], RAP[1])
         ymax = max(0, FP[1], ST[1], AP[1], RAP[1])
+        # offset and vertical alignment for textual labels of points
+        offset = 2*np.sign(AP[1])
+        if np.sign(AP[1]) == -1:
+            vAlign = ['top', 'bottom']
+        else:
+            vAlign = ['bottom', 'top']
         
         for i, (name, rates_mean) in enumerate(rates.items()):
 
@@ -265,17 +271,17 @@ def plot_actLIP():
             ax = plt.subplot(gs[3, i*3:3+i*3])
             # fixation point
             plt.scatter(FP[0], FP[1], marker='o', s=200, color='black')
-            plt.text(FP[0], FP[1]+2, 'FP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='top')
+            plt.text(FP[0], FP[1]-offset, 'FP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment=vAlign[0])
             # saccade target
             plt.scatter(ST[0], ST[1], marker='o', edgecolor='black', facecolor='white', s=200)
             plt.scatter(ST[0], ST[1], marker='o', edgecolor='black', facecolor='black', s=20)
-            plt.text(ST[0], ST[1]+2, 'ST', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='top')
+            plt.text(ST[0], ST[1]-offset, 'ST', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment=vAlign[0])
             # attention position            
             plt.scatter(AP[0], AP[1], marker='o', s=200, color='black')
-            plt.text(AP[0], AP[1]-2, 'AP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='bottom')
+            plt.text(AP[0], AP[1]+offset, 'AP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment=vAlign[1])
             # remapped attention position
             plt.scatter(RAP[0], RAP[1], marker='o', s=200, color='gray')
-            plt.text(RAP[0], RAP[1]-2, 'RAP', color='gray', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment='bottom')
+            plt.text(RAP[0], RAP[1]+offset, 'RAP', color='gray', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment=vAlign[1])
             # saccade
             plt.arrow(FP[0], FP[1], saccade[0], saccade[1], color='black', head_width=2, head_length=1.5, length_includes_head=True)
             # ax.set_aspect(1/3)
@@ -312,7 +318,7 @@ def plot_actLIP():
                 ax.set_yticklabels([])
 
         # add colorbar
-        cbaxes = fig.add_axes([0.97, 0.3, 0.01, 0.6])  # position for the colorbar
+        cbaxes = fig.add_axes([0.96, 0.29, 0.01, 0.56])  # position for the colorbar
         cbar = plt.colorbar(cax=cbaxes)
         cbar.ax.tick_params(labelsize=params['fontsizes']['axes'])
 
@@ -347,8 +353,8 @@ def plot_revCorrelation(layer):
     # one figure for each attention position
     for AP in APs.values():
 
-        fig = plt.figure(figsize=(12, 13.8))
-        plt.subplots_adjust(hspace=0.3)
+        fig = plt.figure(figsize=(12, 15))
+        plt.subplots_adjust(hspace=0.4, top=0.95, bottom=0.05, right=0.95)
 
         for i, (cond, neuronPerAP) in enumerate(tasks.items()):
             # corresponding neuron in attention task (AU or UA) and control neuron
@@ -384,6 +390,7 @@ def plot_revCorrelation(layer):
             plt.plot([AP[0], AP[0]], [onsets[0]-sacOnset, onsets[-1]-sacOnset],
                         'black', linestyle='--')
             plt.xlim(-params['VF_Deg'][0]/2.0, params['VF_Deg'][0]/2.0)
+            plt.xticks(np.array(pos_h[0::20]))
             plt.yticks(np.array(onsets[0::5])-sacOnset)
             if i==0:
                 plt.ylabel('bar onset relative\nto saccade onset (ms)', fontsize=params['fontsizes']['axes'])
@@ -405,6 +412,7 @@ def plot_revCorrelation(layer):
             plt.plot([AP[0], AP[0]], [onsets[0]-sacOnset, onsets[-1]-sacOnset],
                         'black', linestyle='--')
             plt.xlim(-params['VF_Deg'][0]/2.0, params['VF_Deg'][0]/2.0)
+            plt.xticks(np.array(pos_h[0::20]))
             plt.yticks(np.array(onsets[0::5])-sacOnset)
             if i==0:
                 plt.ylabel('bar onset relative\nto saccade onset (ms)', fontsize=params['fontsizes']['axes'])
@@ -427,6 +435,7 @@ def plot_revCorrelation(layer):
                         'black', linestyle='--')
             plt.xlim(-params['VF_Deg'][0]/2.0, params['VF_Deg'][0]/2.0)
             plt.xlabel('horizontal bar position (in deg)', fontsize=params['fontsizes']['axes'])
+            plt.xticks(np.array(pos_h[0::20]))
             plt.yticks(np.array(onsets[0::5])-sacOnset)
             if i==0:
                 plt.ylabel('bar onset relative\nto saccade onset (ms)', fontsize=params['fontsizes']['axes'])
@@ -441,12 +450,10 @@ def plot_revCorrelation(layer):
 
 def plot_actV4L4():
     '''
-    Figure 5, 6, 8:
+    Figure 5 and 7:
     averaged activity of V4, L4 neurons for the three different tasks (AU, UA, UU)
     '''
 
-    # all possible horizontal positions of bar
-    pos_h = np.arange(-params['VF_Deg'][0]/2, params['VF_Deg'][0]/2+params['range_h'], params['range_h'])
     # all possible onsets of bar
     onsets = np.arange(params['range_t'][0], params['range_t'][1]+1, params['range_t'][2])
     # saccade onset
@@ -489,7 +496,7 @@ def plot_actV4L4():
 
     ## plot
     fig = plt.figure(figsize=(24, 13.8))
-    plt.subplots_adjust(hspace=1.0)
+    plt.subplots_adjust(hspace=1.0, left=0.08, right=0.98, top=0.95, bottom=0.05)
     gs = GridSpec(6, 5)
 
     lineSacOnset = (sacOnset-onsets[0])/(onsets[-1]-onsets[0]) * (len(onsets)-1)
@@ -509,7 +516,7 @@ def plot_actV4L4():
     plt.xticks([])
     # y-axis (response of V4)
     plt.ylim(ylim[0])
-    plt.ylabel('average response of V4 neurons\nover all bar positions', fontsize=params['fontsizes']['axes'])
+    plt.ylabel('average response\nof V4 neurons\nover all bar positions', fontsize=params['fontsizes']['axes'])
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(params['fontsizes']['axes'])
 
@@ -532,7 +539,7 @@ def plot_actV4L4():
     plt.xlabel('bar onset relative to saccade onset (ms)', fontsize=params['fontsizes']['axes'])
     # y-axis (response of V4)
     plt.ylim(ylim[1])
-    plt.ylabel('normalized average response of V4 neurons\nover all bar positions',
+    plt.ylabel('normalized average response\nof V4 neurons\nover all bar positions',
                fontsize=params['fontsizes']['axes'])
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(params['fontsizes']['axes'])
@@ -710,7 +717,7 @@ def plot_ratesOneTimestep(timestep, rates, layers, sacOnset, sacOffset, gs, save
             gs           -- grid spec used for plotting
             saveForMovie -- if True, save figure of current timestep for further movie generation
                             else, save figure of current timestep as stand-alone plot
-                            dafault: True
+                            default: True
     '''
     
     # transformation to make plots slanted
@@ -748,7 +755,7 @@ def plot_ratesOneTimestep(timestep, rates, layers, sacOnset, sacOffset, gs, save
             plt.clim(0, rates[l]['max_r'])
             plt.axis('off')
 
-    ## add brackground (frames and arrows), created externally
+    ## add background (frames and arrows), created externally
     ax = fig.add_subplot(gs[:,:])
     bg = plt.imread("movie_rates_bg.png")
     plt.imshow(bg)
@@ -772,7 +779,7 @@ def plot_ratesOverTime(trial, **kwargs):
     '''
 
     gs = GridSpec(5, 13)
-    # layes to plot with corresponding panel
+    # layers to plot with corresponding panel
     layers = {'FEF': {'panel': gs[1, 1:3], 'title': 'FEFv'},
               'FEFvm': {'panel': gs[1, 3:5], 'title': 'FEFvm'},
               'FEFm': {'panel': gs[1, 5:7], 'title': 'FEFm'},

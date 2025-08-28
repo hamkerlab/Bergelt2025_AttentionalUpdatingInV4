@@ -7,7 +7,7 @@ generate input signals for different layers
  - proprioceptive (PC) eye position for PC signal
  - top-down attention for Xh
  - retinal input for V1
- - corollary dischrage for FEFv
+ - corollary discharge for FEFv
 """
 
 
@@ -108,7 +108,7 @@ def generateAttentionSignal(attention, duration):
     ## initialize signal
     att_sig = np.zeros((duration,) + params_model['resSpatial_2d'])
 
-    ## calculation of attention signal for each attention position seperately
+    ## calculation of attention signal for each attention position separately
     for att in attention:
         # onset of attention
         startAtt = att['starttime']
@@ -152,7 +152,7 @@ def generateRetinalSignal(stimuli, duration):
     ## initialize signal
     ret_sig = np.zeros((duration,) + params_model['V1_shape'])
 
-    ## calculation of retinal signal for each stimulus seperately
+    ## calculation of retinal signal for each stimulus separately
     for stim in stimuli:
         # onset of stimulus
         startStim = stim['starttime']
@@ -254,7 +254,7 @@ def esig2d(geometry, pos, sigma, strength):
 
 def rsig2d(geometry, pos, sigma, strength):
     '''
-    Returns an internal stimulus signal given the position of a stimlus in degree
+    Returns an internal stimulus signal given the position of a stimulus in degree
     spatial layout organized in horizontal x vertical
 
     params: geometry -- geometry of input (horizontal x vertical)

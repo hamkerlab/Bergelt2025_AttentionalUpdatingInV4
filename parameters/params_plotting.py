@@ -37,4 +37,4 @@ cdict_red = {'red':   ((0.0, 1.0, 1.0),
 mpl.colormaps.register(cmap=LinearSegmentedColormap(name='myReds', segmentdata=cdict_red))
 
 ## fontsizes
-params['fontsizes'] = {'legend': 12, 'axes': 15, 'text': 16, 'title': 18, 'setup_text': 50, 'setup_axes': 30}
+params['fontsizes'] = {'legend': 20, 'axes': 20, 'text': 25, 'title': 30, 'setup_text': 80, 'setup_axes': 50}

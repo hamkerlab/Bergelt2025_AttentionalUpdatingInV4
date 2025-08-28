@@ -52,7 +52,7 @@ def getData():
 
     ## attention positions and tasks
     # attention position in degree and horizontal x vertical
-    # 4 possible postions: above/below FP/ST
+    # 4 possible positions: above/below FP/ST
     APs = {}
     # tasks: AU, UA and corresponding control (UU)
     tasks = {'AU': {}, 'UA': {}}
@@ -128,7 +128,7 @@ def getBarposAndOnsetCombinations():
     onsets = np.arange(params['range_t'][0], params['range_t'][1]+1, params['range_t'][2])
 
     results = {}
-    # for each attention position seperately
+    # for each attention position separately
     for AP, subtrials in trialsPerAP.items():
         ## extract data in parallel
         print(f"extract data for AP {AP}")    
@@ -162,7 +162,7 @@ def getBarposAndOnsetCombinations():
         results[str(AP)] = {'above': above, 'below': below}
 
     ## save for further usage
-    save_dict_to_hdf5(results, f"../{params['SetupDir']}/barPosOnsetCombimations.hdf5")
+    save_dict_to_hdf5(results, f"../{params['SetupDir']}/barPosOnsetCombinations.hdf5")
 
 
 def extract_eyepos():
@@ -200,7 +200,7 @@ def extract_LIPdata_single(AP_str, trial, layers):
     # get rates of current trial
     fn = f"../{params['ResultDir']}/trials/{trial}/Rates/dict_rates.hdf5"
     rates = load_dict_from_hdf5(fn)        
-    # neuron is retionotopic, thus dependent on actual eye position
+    # neuron is retinotopic, thus dependent on actual eye position
     # eye position over time
     ep = getEyepos(f"../{params['ResultDir']}/trials/{trial}/Rates/eyepos.txt", params['tEnd'] + 1)
     # fixed vertical neuron
@@ -229,7 +229,7 @@ def extract_LIPdata():
               'ALIP_V4L4':'spatial attention from LIP'}
 
     LIPdata = {}
-    # for each attention position seperately
+    # for each attention position separately
     for AP, subtrials in trialsPerAP.items():
         ## extract data in parallel
         print(f"extract data for AP {AP}")
@@ -337,7 +337,7 @@ def extract_onsetPos(layer):
     trialsPerAP = load_dict_from_hdf5(f"../{params['SetupDir']}/trialsPerAP.hdf5")
 
     results = {}
-    # for each attention position seperately
+    # for each attention position separately
     for AP, subtrials in trialsPerAP.items():
         ## extract data in parallel
         print(f"extract data for AP {AP}")    

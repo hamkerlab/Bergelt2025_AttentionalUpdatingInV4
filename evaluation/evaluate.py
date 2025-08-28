@@ -17,9 +17,9 @@ from plotting import plot_setup, plot_revCorrelation, plot_actLIP, plot_actV4L4,
 from parameters.params_general import params
 
 
-#######################
-#### Main programm ####
-#######################
+######################
+#### Main program ####
+######################
 if __name__ == "__main__":
 
     ## preprocess data
@@ -39,9 +39,12 @@ if __name__ == "__main__":
     print("extract LIP data")
     extract_LIPdata()
 
-    for layer in ['r_V4L4', 'r_V1', 'E_V4L4', 'ALIP_V4L4', 'ASP_V4L4', 'AFEAT_V4L4', 'sum(A_LIPpc)_V4L4', 'sum(A_LIPcd)_V4L4']:
-        print(f"extract data of layer {layer}")
-        extract_onsetPos(layer)
+    print(f"extract rates of layer V4L4")
+    extract_onsetPos('r_V4L4')
+    # additional evaluation for sub results
+    # for layer in ['r_V1', 'E_V4L4', 'ALIP_V4L4', 'ASP_V4L4', 'AFEAT_V4L4', 'sum(A_LIPpc)_V4L4', 'sum(A_LIPcd)_V4L4']:
+    #    print(f"extract data of layer {layer}")
+    #    extract_onsetPos(layer)
 
 
     ## plotting
@@ -55,20 +58,23 @@ if __name__ == "__main__":
     else:
         trial = 1
 
-    # Figure 1
+    # Figure 2
     plot_setup(trial)
 
-    # Figure 3/7
+    # Figure 3 and 6
     plot_actLIP()
 
     # Figure 4
-    for layer in ['r_V4L4', 'r_V1', 'E_V4L4', 'ALIP_V4L4', 'ASP_V4L4', 'AFEAT_V4L4', 'sum(A_LIPpc)_V4L4', 'sum(A_LIPcd)_V4L4']:
-        print(f"plot reverse correlation of layer {layer}")
-        plot_revCorrelation(layer)
+    plot_revCorrelation('r_V4L4')
+    # additional plots for sub results
+    # for layer in ['r_V1', 'E_V4L4', 'ALIP_V4L4', 'ASP_V4L4', 'AFEAT_V4L4', 'sum(A_LIPpc)_V4L4', 'sum(A_LIPcd)_V4L4']:
+    #     print(f"plot reverse correlation of layer {layer}")
+    #     plot_revCorrelation(layer)
 
-    # Figure 5/6/8
+    # Figure 5 and 7
     plot_actV4L4()
-    plot_actAll()
+    # additional plots for sub results
+    # plot_actAll()
 
     # Figure 9
     plot_ratesOverTime(trial)

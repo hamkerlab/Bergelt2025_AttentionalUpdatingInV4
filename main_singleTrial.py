@@ -130,7 +130,7 @@ def run(number):
     #############################
     output = {'t_start': 0, 'FP': FP, 'ST': ST, 'AP': AP}
 
-    ## set signals (adjustance due to TimedArray)
+    ## set signals
     # set baseline of XePC to pc signal
     net.PC_Input.rates = pc_sig
     # set baseline of Xh to attention signal
@@ -207,7 +207,7 @@ def run(number):
 
         # FEFfix controls the starting of the next object localization task. Until
         # it, an execution of a novel saccade is not allowed which ensures that the current
-        # saccade is completly executed. New saccade execution is suppressed for the whole eye movement.
+        # saccade is completely executed. New saccade execution is suppressed for the whole eye movement.
         fix = np.zeros((duration, 1))
         fix[Step:Step+sacDur+2] = 1
         net.FEFfix.rates = fix
@@ -247,9 +247,9 @@ def run(number):
     saveRates(monitors, f"{saveDirRates}/dict_rates_full.hdf5")
 
 
-#######################
-#### Main programm ####
-#######################
+######################
+#### Main program ####
+######################
 if __name__ == "__main__":
 
     Stop01 = timeit.default_timer()

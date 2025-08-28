@@ -46,14 +46,14 @@ params['tEnd'] = 700               # duration of each simulation
 
 # stimuli (=bars) above/below horizontal center line over whole horizontal space with random onset aligned to saccade onset and random duration
 params['range_v'] = 7                               # distance of "above" and "below" in degree
-params['range_sup'] = 2                             # minimum distance between two simultanously shown bars in degree
+params['range_sup'] = 2                             # minimum distance between two simultaneously shown bars in degree
 params['range_h'] = 0.5                             # minimum horizontal distance between two bars in degree
 params['flash_duration'] = [5, 20]                  # flash duration for bars in ms
 params['saccOnset'] = 350                           # saccade onset
 params['range_t'] = [params['saccOnset']-300,       # start of stimulus presentation
                      params['saccOnset']+300,       # end of stimulus presentation
-                     params['flash_duration'][1],   # mininum time between two bars
-                     100]                           # mininum time between two bars at the same position
+                     params['flash_duration'][1],   # minimum time between two bars
+                     100]                           # minimum time between two bars at the same position
 
 # saccade 5 degree to the right
 params['saccade'] = [5, 0]

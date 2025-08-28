@@ -31,7 +31,7 @@ params.update(params_model)
 ##########################################
 ##########  NEURON DEFINITION   ##########
 ##########################################
-## Basic Auxillary Neuron is transmitting an unmodified input
+## Basic Auxiliary Neuron is transmitting an unmodified input
 Aux_Neuron = Neuron(
     name='Aux Neuron',
     equations="""
@@ -247,7 +247,7 @@ if os.path.exists(fn):
     V1_inp.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     V1_inp.connect_one_to_one(1.0)
 # - input to PC signal
 PC_inp = Projection(PC_Input, PC_Pop, 'inp')
@@ -256,7 +256,7 @@ if os.path.exists(fn):
     PC_inp.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     PC_inp.connect_one_to_one(1.0)
 # - input to Xh
 Xh_inp = Projection(Xh_Input, Xh_Pop, 'inp')
@@ -265,7 +265,7 @@ if os.path.exists(fn):
     Xh_inp.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     Xh_inp.connect_one_to_one(1.0)
 
 ## Connections to V4 L4
@@ -295,7 +295,7 @@ if os.path.exists(fn):
     LIPpc_V4L4.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     LIPpc_V4L4.connect_with_func(method=gaussian4dTo3d, mv=params['K_LIPpc-V4L4'], sigma=params['sigma_LIPpc-V4L4'])
 # - amplification from LIP CD
 LIPcd_V4L4 = Projection(LIPcd_Pop, V4L4_Pop, 'A_LIPcd')
@@ -304,7 +304,7 @@ if os.path.exists(fn):
     LIPcd_V4L4.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     LIPcd_V4L4.connect_with_func(method=gaussian4dTo3d, mv=params['K_LIPcd-V4L4'], sigma=params['sigma_LIPcd-V4L4'])
 
 ## Connections to V4 L2/3
@@ -345,7 +345,7 @@ if os.path.exists(fn):
     FEFfix_FEFm.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     FEFfix_FEFm.connect_all_to_all(weights=1.0)
 
 ## Connections to CD signal
@@ -356,7 +356,7 @@ if os.path.exists(fn):
     PCsignal_CDsignal.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     PCsignal_CDsignal.connect_with_func(method=gaussian2dTo4d_v, mv=params['K_PC-CD'], sigma=params['sigma_PC-CD'])
 # - FF from FEFm
 FEFm_CDsignal = Projection(FEFm_Pop, CD_Pop, 'FF_FEF')
@@ -365,7 +365,7 @@ if os.path.exists(fn):
     FEFm_CDsignal.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     FEFm_CDsignal.connect_with_func(method=gaussian2dTo4d_h, mv=params['K_FEFm-CD'], sigma=params['sigma_FEFm-CD'])
 
 ## Connections to LIP PC
@@ -376,7 +376,7 @@ if os.path.exists(fn):
     V4L4_LIPpc.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     V4L4_LIPpc.connect_with_func(method=gaussian3dTo4d, mv=params['K_V4L4-LIPpc'], sigma=params['sigma_V4L4-LIPpc'])
 # - FF from PC signal
 PCsignal_LIPpc = Projection(PC_Pop, LIPpc_Pop, 'FF_PC')
@@ -385,7 +385,7 @@ if os.path.exists(fn):
     PCsignal_LIPpc.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     PCsignal_LIPpc.connect_with_func(method=gaussian2dTo4d_v, mv=params['K_PC-LIPpc'], sigma=params['sigma_PC-LIPpc'])
 # - FF from FEFvm
 # via auxiliary population used already for FEFvm -> V4 L4
@@ -395,7 +395,7 @@ if os.path.exists(fn):
     FEFvm_LIPpc.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     FEFvm_LIPpc.connect_with_func(method=gaussian2dTo4d_h, mv=params['K_FEFvm-LIPpc'], sigma=params['sigma_FEFvm-LIPpc'])
 # - FB from Xh
 Xh_LIPpc = Projection(Xh_Pop, LIPpc_Pop, 'FB')
@@ -404,7 +404,7 @@ if os.path.exists(fn):
     Xh_LIPpc.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     Xh_LIPpc.connect_with_func(method=gaussian2dTo4d_diag, mv=params['K_Xh-LIPpc'], sigma=params['sigma_Xh-LIPpc'])
 # - lateral excitation
 LIPpc_exc = Projection(LIPpc_Pop, LIPpc_Pop, 'exc')
@@ -413,7 +413,7 @@ if os.path.exists(fn):
     LIPpc_exc.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     LIPpc_exc.connect_with_func(method=all2all_exp4d, mv=params['w_LIPpc-exc'], sigma=params['sigma_LIPpc-exc'])
 
 ## Connections to LIP CD
@@ -424,7 +424,7 @@ if os.path.exists(fn):
     V4L4_LIPcd.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     V4L4_LIPcd.connect_with_func(method=gaussian3dTo4d, mv=params['K_V4L4-LIPcd'], sigma=params['sigma_V4L4-LIPcd'])
 # - FF from CD signal
 CDsignal_LIPcd = Projection(CD_Pop, LIPcd_Pop, 'FF_CD')
@@ -433,7 +433,7 @@ if os.path.exists(fn):
     CDsignal_LIPcd.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     CDsignal_LIPcd.connect_with_func(method=gaussian4d_diagTo4d_v, mv=params['K_CD-LIPcd'], sigma=params['sigma_CD-LIPcd'])
 # - FF from FEFvm
 # via auxiliary population used already for FEFvm -> V4 L4
@@ -443,7 +443,7 @@ if os.path.exists(fn):
     FEFvm_LIPcd.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     FEFvm_LIPcd.connect_with_func(method=gaussian2dTo4d_h, mv=params['K_FEFvm-LIPcd'], sigma=params['sigma_FEFvm-LIPcd'])
 # - FB from Xh
 Xh_LIPcd = Projection(Xh_Pop, LIPcd_Pop, 'FB')
@@ -452,7 +452,7 @@ if os.path.exists(fn):
     Xh_LIPcd.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     Xh_LIPcd.connect_with_func(method=gaussian2dTo4d_diag, mv=params['K_Xh-LIPcd'], sigma=params['sigma_Xh-LIPcd'])
 
 ## to Xh
@@ -463,7 +463,7 @@ if os.path.exists(fn):
     LIPpc_Xh.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     LIPpc_Xh.connect_with_func(method=gaussian4dTo2d_diag, mv=params['K_LIPpc-Xh'], sigma=params['sigma_LIPpc-Xh'])
 # - FF from LIP CD
 LIPcd_Xh = Projection(LIPcd_Pop, Xh_Pop, 'FF_CD')
@@ -472,7 +472,7 @@ if os.path.exists(fn):
     LIPcd_Xh.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     LIPcd_Xh.connect_with_func(method=gaussian4dTo2d_diag, mv=params['K_LIPcd-Xh'], sigma=params['sigma_LIPcd-Xh'])
 # - lateral excitation
 Xh_exc = Projection(Xh_Pop, Xh_Pop, 'exc')
@@ -481,5 +481,5 @@ if os.path.exists(fn):
     Xh_exc.connect_from_file(filename=fn)
     print(" - loaded %s" % fn)
 else:
-    # could not load connection, therfore create it
+    # could not load connection, therefore create it
     Xh_exc.connect_with_func(method=all2all_exp2d, mv=params['w_Xh-exc'], sigma=params['sigma_Xh-exc'])
