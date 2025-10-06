@@ -52,7 +52,7 @@ def generatePCsignal(SaccStart, SaccTarget, SaccOnset, SaccDur, duration):
     ## timing of update relative to saccade offset
     SaccOffset = SaccOnset + SaccDur
     # update, i.e. offset of old PC signal and onset of new PC signal
-    t_pc_update = SaccOffset + params_model['pc_update']
+    t_pc_update = SaccOffset + params_model['pc_t_update']
     t_pc_update = min(max(0, t_pc_update), duration) # bounded between 0 and duration
 
 
@@ -75,7 +75,7 @@ def generatePCsignal(SaccStart, SaccTarget, SaccOnset, SaccDur, duration):
 
     ## add gaussian decay to presaccadic position
     t_pc_decay = np.arange(t_pc_update, duration)
-    factor = np.exp(-(t_pc_decay-t_pc_update)*(t_pc_decay-t_pc_update)/(2.0*params_model['pc_off_decay']*params_model['pc_off_decay']))
+    factor = np.exp(-(t_pc_decay-t_pc_update)*(t_pc_decay-t_pc_update)/(2.0*params_model['pc_sigma_decay']*params_model['pc_sigma_decay']))
     pc_decay = pc_pre * (factor * np.ones(params_model['resSpatial_2d'][::-1] + (1,))).T
     pc_sig[t_pc_update:] = np.maximum(pc_sig[t_pc_update:], pc_decay)
 
@@ -196,7 +196,7 @@ def generateCDSignal(SaccStart, SaccTarget, SaccOnset, duration):
     ##########################
 
     # peak time of CD signal
-    t_peak = SaccOnset + params_model['cd_peak']
+    t_peak = SaccOnset + params_model['cd_t_peak']
     # CD signal is retinotopic, thus calculate eye-centered saccade target
     ST = SaccTarget - SaccStart
 
@@ -213,10 +213,10 @@ def generateCDSignal(SaccStart, SaccTarget, SaccOnset, duration):
     tc = np.zeros(duration)
     # rise of CD signal until peak time
     rise = np.arange(0, t_peak+1)
-    tc[rise] = np.exp(-((rise-t_peak)*(rise-t_peak))/(2.0*params_model['cd_rise']*params_model['cd_rise']))
+    tc[rise] = np.exp(-((rise-t_peak)*(rise-t_peak))/(2.0*params_model['cd_sigma_rise']*params_model['cd_sigma_rise']))
     # decay of CD signal from peak time until end of simulation
     decay = np.arange(t_peak, duration)
-    tc[decay] = np.exp(-((decay-t_peak)*(decay-t_peak))/(2.0*params_model['cd_decay']*params_model['cd_decay']))
+    tc[decay] = np.exp(-((decay-t_peak)*(decay-t_peak))/(2.0*params_model['cd_sigma_decay']*params_model['cd_sigma_decay']))
     # add time course to cd signal
     cd_sig = cd * (tc * np.ones(params_model['FEF_shape'][::-1] + (1,))).T
 

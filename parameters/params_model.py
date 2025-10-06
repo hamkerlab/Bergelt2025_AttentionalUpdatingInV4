@@ -20,26 +20,26 @@ from parameters.params_general import params
 ## Neurons ##
 ## V4 Parameters
 params['sigma_V4L4'] = 0.4
-params['g_V4L4'] = 1.066
+params['v_V4L4'] = 1.066
 params['v_V1-V4L4'] = 1.0
 params['p_V1-V4L4'] = 1
-params['delay_V1_V4L4'] = 5
+params['delay_V1-V4L4'] = 5
 params['v_V4L23-V4L4'] = 0.5
 params['p_V4L23-V4L4'] = 1
 params['v_FEFvm-V4L4'] = 4.0
 params['v_LIP-V4L4'] = 3.0
 params['sigma_V4L23'] = 1.0
-params['g_V4L23'] = 1.625
+params['v_V4L23'] = 1.625
 params['v_V4L4-V4L23'] = 1.0
 params['p_V4L4-V4L23'] = 0.25
-params['p_V4L4-V4L23_ws'] = 4
+params['p_V4L4-V4L23,ws'] = 4
 
 ## FEF Parameters
 params['v_FEFv-FEFvm'] = 0.2
 params['v_FEFv-FEFvm_E'] = 0.6
 params['v_FEFv-FEFvm_S'] = 0.6
-params['v_FEFv-FEFvm_scale'] = 0.35
-params['v_FEFv-FEFvm_factor'] = 0.93
+params['v_FEFv-FEFvm,scale'] = 0.35
+params['v_FEFv-FEFvm,factor'] = 0.93
 params['v_FEFvm-FEFm_E'] = 1.3
 params['v_FEFvm-FEFm_S'] = 0.3
 params['v_FEFfix-FEFm'] = 0.3
@@ -57,8 +57,8 @@ params['sigma_LIPcd'] = 0.5
 params['sigma_LIPpc'] = 1.0
 params['sigma_Xh'] = 0.5
 # synaptic suppression for Xh
-params['d_dep_Xh'] = 2.2
-params['tau_dep_Xh'] = 10000
+params['d_Xh_dep'] = 2.2
+params['tau_Xh_dep'] = 10000
 
 ### Universal Parameters
 params['tau'] = 10
@@ -84,14 +84,14 @@ params['viewfield'] = np.array([10.3, 7.8])
 params['degPerCell_V4L4'] = params['viewfield'] / params['resVisual']
 params['degPerCell_V4L23'] = params['viewfield'] / params['V4L23_shape'][:2]
 params['rfsize_V4p'] = [5, 5] * (params['degPerCell_V4L4']/params['degPerCell_V4L23'])
-params['sigma_RF_A_Feat'] = params['rfsize_V4p'] / 3
-params['RFsize23_4'] = [3, 3]
-params['FBA_delay'] = 2
-params['RFsize4_23'] = [5, 5]
-params['RFsigma4_23'] = [5. / 3, 5. / 3]
+params['RFsigma_V4L23-V4L4'] = params['rfsize_V4p'] / 3
+params['RFsize_V4L23-V4L4'] = [3, 3]
+params['delay_V4L23-V4L4'] = 2
+params['RFsize_V4L4-V4L23'] = [5, 5]
+params['RFsigma_V4L4-V4L23'] = [5. / 3, 5. / 3]
 
-params['RFsizev_vm'] = [41, 31]
-params['RFsigmav_vm'] = [4, 3]
+params['RFsize_FEFv-FEFvm'] = [41, 31]
+params['RFsigma_FEFv-FEFvm'] = [4, 3]
 
 ## own-defined Gaussian Connection Pattern
 # highest value of Gaussian
@@ -110,12 +110,12 @@ params['K_LIPpc-Xh'] = 0.05
 params['K_LIPcd-V4L4'] = 0.5
 params['K_LIPpc-V4L4'] = 0.2
 
-params['w_CD-inh'] = 0.05
-params['w_LIPcd-inh'] = 0.05
-params['w_LIPpc-exc'] = 0.6
-params['w_LIPpc-inh'] = 0.2
-params['w_Xh-exc'] = 1.0
-params['w_Xh-inh'] = 1.0
+params['v_CD-inh'] = 0.05
+params['v_LIPcd-inh'] = 0.05
+params['K_LIPpc,exc'] = 0.6
+params['v_LIPpc-inh'] = 0.2
+params['K_Xh,exc'] = 1.0
+params['v_Xh-inh'] = 1.0
 
 # width of Gaussian
 params['sigma_FEFm-CD'] = 1.0
@@ -133,8 +133,8 @@ params['sigma_LIPpc-Xh'] = 1.0
 params['sigma_LIPcd-V4L4'] = 0.5
 params['sigma_LIPpc-V4L4'] = 0.5
 
-params['sigma_LIPpc-exc'] = 0.25
-params['sigma_Xh-exc'] = 0.25
+params['sigma_LIPpc,exc'] = 0.25
+params['sigma_Xh,exc'] = 0.25
 
 
 #######################
@@ -146,9 +146,9 @@ params['cd_strength'] = 0.375
 # width
 params['cd_sigma'] = 1.0
 # rise and decay
-params['cd_rise'] = 60
-params['cd_decay'] = 40
-params['cd_peak'] = 29 # correcting for real saccadeOnset
+params['cd_sigma_rise'] = 60
+params['cd_sigma_decay'] = 40
+params['cd_t_peak'] = 29
 
 ## proprioceptive eye position (PC)
 # strength
@@ -156,8 +156,8 @@ params['pc_strength'] = 0.3
 # width
 params['pc_sigma'] = 1.0
 # update
-params['pc_update'] = 60
-params['pc_off_decay'] = 35
+params['pc_t_update'] = 60
+params['pc_sigma_decay'] = 35
 
 ## visual input
 # strength

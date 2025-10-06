@@ -64,7 +64,7 @@ V4L4_Neuron = Neuron(
         vFEFvm = 'v_FEFvm-V4L4' : population
         vLIP = 'v_LIP-V4L4' : population
         sigma = 'sigma_V4L4' : population
-        g = 'g_V4L4' : population
+        g = 'v_V4L4' : population
     """,
     equations="""
         E = pow(vV1*clip(sum(exc), 0, 1), pV1)
@@ -86,7 +86,7 @@ V4L23_Neuron = Neuron(
         vV4L4 = 'v_V4L4-V4L23' : population
         pV4L4 = 'p_V4L4-V4L23' : population
         sigma = 'sigma_V4L23' : population
-        g = 'g_V4L23' : population
+        g = 'v_V4L23' : population
     """,
     equations="""
         E = pow(vV4L4*sum(exc), pV4L4)
@@ -139,7 +139,7 @@ CD_Neuron = Neuron(
     name='CD Neuron',
     parameters="""
         tau = 'tau' : population
-        w_inh = 'w_CD-inh' : population
+        w_inh = 'v_CD-inh' : population
         num_neurons = 'num_neurons_4d' : population
     """,
     equations="""
@@ -156,7 +156,7 @@ LIPpc_Neuron = Neuron(
         tau = 'tau' : population
         A = 'A_LIPpc' : population
         D = 'D_LIPpc' : population
-        w_inh = 'w_LIPpc-inh' : population
+        w_inh = 'v_LIPpc-inh' : population
         num_neurons = 'num_neurons_4d' : population
         sigma = 'sigma_LIPpc' : population
     """,
@@ -175,7 +175,7 @@ LIPcd_Neuron = Neuron(
         A = 'A_LIPcd' : population
         D = 'D_LIPcd : population
         tau = 'tau' : population
-        w_inh = 'w_LIPcd-inh' : population
+        w_inh = 'v_LIPcd-inh' : population
         num_neurons = 'num_neurons_4d' : population
         sigma = 'sigma_LIPcd' : population
     """,
@@ -193,9 +193,9 @@ Xh_Neuron = Neuron(
     parameters="""
         D = 'D_Xh' : population
         tau = 'tau' : population
-        tau_dep = 'tau_dep_Xh' : population
-        d_dep = 'd_dep_Xh' : population
-        w_inh = 'w_Xh-inh' : population
+        tau_dep = 'tau_Xh_dep' : population
+        d_dep = 'd_Xh_dep' : population
+        w_inh = 'v_Xh-inh' : population
         num_neurons = 'num_neurons_2d' : population
         sigma = 'sigma_Xh' : population
     """,
@@ -272,14 +272,14 @@ else:
 # - excitation from V1
 w = np.ones((params['V4L4_shape'][-1],)+(1,1,)+params['V1_shape'][2:])
 V1_V4L4 = Convolution(V1_Pop, V4L4_Pop, 'exc')
-V1_V4L4.connect_filters(weights=w, delays=params['delay_V1_V4L4'])
+V1_V4L4.connect_filters(weights=w, delays=params['delay_V1-V4L4'])
 # - feature-based amplification from V4 L2/3
-w = Gaussian2D(1.0, params['RFsize23_4'], params['sigma_RF_A_Feat'])[:, :, None]
+w = Gaussian2D(1.0, params['RFsize_V4L23-V4L4'], params['RFsigma_V4L23-V4L4'])[:, :, None]
 ssList = []
 for Row, Col, Plane in rangeX(params['V4L4_shape']):
     ssList.append([Row // 2, Col // 2, Plane])
 V4L23_V4L4A = Convolution(V4L23_Pop, V4L4_Pop, 'A_FEAT', operation='max')
-V4L23_V4L4A.connect_filter(weights=w, delays=params['FBA_delay'], keep_last_dimension=True, subsampling=ssList)
+V4L23_V4L4A.connect_filter(weights=w, delays=params['delay_V4L23-V4L4'], keep_last_dimension=True, subsampling=ssList)
 # - amplification from FEFvm
 # The auxiliary population is used to pool FEFvm activities over different layers. Then a one to many connectivity is used.
 # This combination is currently not possible in one step in ANNarchy.
@@ -309,9 +309,9 @@ else:
 
 ## Connections to V4 L2/3
 # - excitation from V4 L4
-w = Gaussian2D(1.0, params['RFsize4_23'], params['RFsigma4_23'])[:, :, None]
+w = Gaussian2D(1.0, params['RFsize_V4L4-V4L23'], params['RFsigma_V4L4-V4L23'])[:, :, None]
 w /= w.sum()
-pspText = 'w*pow(pre.r, {p_V4L4-V4L23_ws})'.format(**params)
+pspText = 'w*pow(pre.r, {p_V4L4-V4L23,ws})'.format(**params)
 ssList = []
 for Row, Col, Plane in rangeX(params['V4L23_shape']):
     ssList.append([Row * 2 + 1, Col * 2 + 1, Plane])
@@ -321,9 +321,9 @@ V4L4_V4L23.connect_filter(weights=w, keep_last_dimension=True, subsampling=ssLis
 ## Connections to FEFvm
 # - excitation and suppression from FEFv
 # A lowered Gaussian is used to simulate the combined responses
-G = Gaussian2D(1.0, params['RFsizev_vm'], params['RFsigmav_vm'])
-w = np.tile((G - params['v_FEFv-FEFvm_scale'])[None, :, :], (params['FEFvm_shape'][-1], 1, 1))
-w *= params['v_FEFv-FEFvm_factor']**np.arange(6)[:, None, None]
+G = Gaussian2D(1.0, params['RFsize_FEFv-FEFvm'], params['RFsigma_FEFv-FEFvm'])
+w = np.tile((G - params['v_FEFv-FEFvm,scale'])[None, :, :], (params['FEFvm_shape'][-1], 1, 1))
+w *= params['v_FEFv-FEFvm,factor']**np.arange(6)[:, None, None]
 # The plus sign(+) is needed, so that w will not be overwritten
 FEFv_FEFvmE = Convolution(FEFv_Pop, FEFvm_Pop, 'E_v')
 FEFv_FEFvmE.connect_filters(weights=positive(+w))
@@ -414,7 +414,7 @@ if os.path.exists(fn):
     print(" - loaded %s" % fn)
 else:
     # could not load connection, therefore create it
-    LIPpc_exc.connect_with_func(method=all2all_exp4d, mv=params['w_LIPpc-exc'], sigma=params['sigma_LIPpc-exc'])
+    LIPpc_exc.connect_with_func(method=all2all_exp4d, mv=params['K_LIPpc,exc'], sigma=params['sigma_LIPpc,exc'])
 
 ## Connections to LIP CD
 # - FF from V4 L4
@@ -482,4 +482,4 @@ if os.path.exists(fn):
     print(" - loaded %s" % fn)
 else:
     # could not load connection, therefore create it
-    Xh_exc.connect_with_func(method=all2all_exp2d, mv=params['w_Xh-exc'], sigma=params['sigma_Xh-exc'])
+    Xh_exc.connect_with_func(method=all2all_exp2d, mv=params['K_Xh,exc'], sigma=params['sigma_Xh,exc'])
