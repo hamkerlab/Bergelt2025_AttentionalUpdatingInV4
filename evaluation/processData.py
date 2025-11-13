@@ -131,7 +131,7 @@ def getBarposAndOnsetCombinations():
     # for each attention position separately
     for AP, subtrials in trialsPerAP.items():
         ## extract data in parallel
-        print(f"extract data for AP {AP}")    
+        print(f"extract data for AP {AP} ({len(subtrials)} trials)")
         runParallel = [(f"../{params['SetupDir']}/{int(trial)}/", params['tEnd']+1, False) for trial in subtrials]
         # Step 1: Init multiprocessing.Pool()
         pool = mp.Pool(min(mp.cpu_count()-1, params['runInParallel'], len(runParallel)))
@@ -232,7 +232,7 @@ def extract_LIPdata():
     # for each attention position separately
     for AP, subtrials in trialsPerAP.items():
         ## extract data in parallel
-        print(f"extract data for AP {AP}")
+        print(f"extract data for AP {AP} ({len(subtrials)} trials)")
         runParallel = [(AP, int(trial), list(layers.keys())) for trial in subtrials]    
         # Step 1: Init multiprocessing.Pool()
         pool = mp.Pool(min(mp.cpu_count()-1, params['runInParallel'], len(runParallel)))
@@ -340,7 +340,7 @@ def extract_onsetPos(layer):
     # for each attention position separately
     for AP, subtrials in trialsPerAP.items():
         ## extract data in parallel
-        print(f"extract data for AP {AP}")    
+        print(f"extract data for AP {AP} ({len(subtrials)} trials)")
         runParallel = [(int(trial), list(neurons.values()), layer) for trial in subtrials]
         # Step 1: Init multiprocessing.Pool()
         pool = mp.Pool(min(mp.cpu_count()-1, params['runInParallel'], len(runParallel)))
@@ -350,7 +350,7 @@ def extract_onsetPos(layer):
         pool.close()
 
         ## get mean over all results
-        # print(f"summarize data for AP {AP}")
+        print(f"summarize data for AP {AP}")
         # sum up all subresults
         onsetPos = subresults[0]['onsetPos']
         counter = subresults[0]['counter']
@@ -369,4 +369,75 @@ def extract_onsetPos(layer):
                 
 
     ## save extracted results for further usage
-    save_dict_to_hdf5(results, f"../{params['ResultDir']}/extractedData/{layer}.hdf5")
+    save_dict_to_hdf5(results, f"../{params['ResultDir']}/extractedData/{layer}_onsetPos.hdf5")
+
+
+def extract_rates_single(trial, neurons, layer):
+    '''
+    extract data for given trial and layer and all neurons
+    can be run in parallel
+
+    params: trial   -- given trial
+            neurons -- dict of neurons, whose rates should be extracted
+            layer   -- name of layer/stuff that should be extracted
+    '''
+
+    layer_name = layer[layer.rfind('_')+1:]
+    layer_stuff = layer[:layer.rfind('_')]
+
+    ## get firing rate over time for given neuron in this trial
+    fn = f"../{params['ResultDir']}/trials/{trial}/Rates/dict_rates.hdf5"
+    rate = load_dict_from_hdf5(fn)[layer_name][layer_stuff]
+    if layer_name == 'V1':
+        rate = rate[:, :, :, 0, 0]
+    else:
+        rate = rate[:, :, :, 0]
+
+    rates = {}
+    for cond, n in neurons.items():
+        rates[cond] = rate[:, n[0], n[1]]
+
+    return rates
+
+def extract_rates(layer):
+    '''
+    extract and summarize simulation results from all trials for specific neurons (dependent on task)
+
+    params: layer -- name of layer/stuff whose data should be extracted
+    '''
+
+    _, _, tasks, control = getData()
+    trialsPerAP = load_dict_from_hdf5(f"../{params['SetupDir']}/trialsPerAP.hdf5")
+
+    results = {}
+    # for each attention position separately
+    for AP, subtrials in trialsPerAP.items():
+
+        ## get neurons dependent on task
+        neurons_to_extract = {}
+        # AU and UA
+        for cond, neuronPerAP in tasks.items():
+            neurons_to_extract[cond] = neuronPerAP[AP]
+        # UU (=control for AU and UA)
+        for cond, neuronPerAP in control.items():
+            neurons_to_extract['UU_'+cond] = neuronPerAP[AP]
+
+        ## extract data in parallel
+        print(f"extract data for AP {AP} ({len(subtrials)} trials)")
+        runParallel = [(int(trial), neurons_to_extract, layer) for trial in subtrials]
+        # Step 1: Init multiprocessing.Pool()
+        pool = mp.Pool(min(mp.cpu_count()-1, params['runInParallel'], len(runParallel)))
+        # Step 2: `pool.apply` the `add()`
+        subresults = pool.starmap(extract_rates_single, runParallel)
+        # Step 3: Don't forget to close
+        pool.close()
+
+        ## rearrange subresults
+        results[str(AP)] = {k: [] for k in neurons_to_extract.keys()}
+        for res in subresults:
+            for cond, r in res.items():
+                results[str(AP)][cond].append(r)
+        
+
+    ## save extracted results for further usage
+    save_dict_to_hdf5(results, f"../{params['ResultDir']}/extractedData/{layer}_rates.hdf5")

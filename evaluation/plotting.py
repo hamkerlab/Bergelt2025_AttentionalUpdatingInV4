@@ -11,6 +11,7 @@ Main script for plotting
 import os
 import sys
 import numpy as np
+import pingouin
 import multiprocessing as mp
 import pylab as plt
 from matplotlib.gridspec import GridSpec
@@ -22,7 +23,7 @@ from processData import getData
 
 # import files from parent folders
 sys.path.append('../')
-from helper import getEyepos, getBarpos, getOutputData, idx_to_deg
+from helper import getEyepos, getBarpos, getOutputData, idx_to_deg, deg_to_idx
 from saving import load_dict_from_hdf5
 # parameters
 from parameters.params_general import params
@@ -48,8 +49,9 @@ def plot_setup(trial):
     loadedSetup = getOutputData(f"../{params['ResultDir']}/trials/{trial}/Rates/output.txt")
     FP = loadedSetup['FP']                      # fixation point
     ST = loadedSetup['ST']                      # saccade target
+    saccade = np.array(params['saccade'])       # saccade
     AP = loadedSetup['AP']                      # attention position
-    RAP = AP - np.array(params['saccade'])      # remapped attention position
+    RAP = AP - saccade                          # remapped attention position
     start_timestep = loadedSetup['t_start']     # start of simulation
     end_timestep = loadedSetup['t_end']         # end of simulation
     duration = end_timestep-start_timestep+1    # total duration of simulation
@@ -61,6 +63,39 @@ def plot_setup(trial):
     
     # bar positions over time
     bars = getBarpos(f"../{params['ResultDir']}/trials/{trial}/Rates/0_barpos.txt", duration)
+
+    # inputs over time
+    dict_inputs = load_dict_from_hdf5(f"../{params['ResultDir']}/trials/{trial}/Rates/dict_inputs.hdf5")
+    # prepare for plotting (plot only horizontal dimension)
+    inputs = {}
+    cbar_sizes = {'x': [0.47, 0.96], 'y': [0.155, 0.57], 'w': 0.01, 'h': 0.38}
+    # FEF
+    name = 'saccade planning towards ST $(signal^{\\text{FEF}})$'
+    r = dict_inputs['FEF'][:, :, deg_to_idx(ST[1], params['FEF_shape'][1], params['VF_Deg'][1])]
+    inputs[name] = {'r': r, 'gs': [[0,4], [0,1]],
+                    'cbar': [cbar_sizes['x'][0], cbar_sizes['y'][1], cbar_sizes['w'], cbar_sizes['h']]}
+    # PC
+    name = 'proprioceptive eye position signal $(signal^{\\text{PC}})$'
+    r = dict_inputs['PC_post'][:, :, deg_to_idx(FP[1], params['resSpatial_2d'][1], params['VF_Deg'][1])]
+    # r = dict_rates['PC signal']['r'][:, :, deg_to_idx(FP[1], params['resSpatial_2d'][1], params['VF_Deg'][1])]
+    inputs[name] = {'r': r, 'gs': [[4,8], [1,2]],
+                    'cbar': [cbar_sizes['x'][1], cbar_sizes['y'][0], cbar_sizes['w'], cbar_sizes['h']]}
+    # top-down attention
+    name = 'attention pointer on AP $(signal^{\\text{att}})$'
+    r = dict_inputs.get('attention_post', dict_inputs['attention_pre'])[:, :, deg_to_idx(AP[1], params['resSpatial_2d'][1], params['VF_Deg'][1])]
+    # r = dict_rates['Xh']['r'][:, :, deg_to_idx(AP[1], params['resSpatial_2d'][1], params['VF_Deg'][1])]
+    inputs[name] = {'r': r, 'gs': [[0,4], [1,2]],
+                    'cbar': [cbar_sizes['x'][1], cbar_sizes['y'][1], cbar_sizes['w'], cbar_sizes['h']]}
+    # visual input
+    name = ['bars above $(signal^{\\text{vis}})$', 'bars below $(signal^{\\text{vis}})$']
+    r = np.concatenate((dict_inputs['retinal_pre'][:sacOnset, :, :, 0, 0], dict_inputs['retinal_post'][sacOnset:, :, :, 0, 0]))
+    # r = dict_rates['V1']['r'][:, :, :, 0, 0]
+    inputs[name[0]] = {'r': r[:, :, deg_to_idx(-params['range_v'], params['V1_shape'][1], params['VF_Deg'][1])], 'gs': [[4,6], [0,1]]}
+    inputs[name[1]] = {'r': r[:, :, deg_to_idx(params['range_v'], params['V1_shape'][1], params['VF_Deg'][1])], 'gs': [[6,8], [0,1]],
+                       'cbar': [cbar_sizes['x'][0], cbar_sizes['y'][0], cbar_sizes['w'], cbar_sizes['h']]}
+
+    ext_rates = [-params['VF_Deg'][0]/2, params['VF_Deg'][0]/2, timesteps[-1], timesteps[0]]
+
 
     ## plotting
     ## spatial    
@@ -165,6 +200,75 @@ def plot_setup(trial):
     plt.savefig(f"../{params['ResultDir']}/figs/Fig2B_trial={trial}.svg")
     plt.close(fig)
 
+
+    ## (horizontal) inputs over time
+    fig = plt.figure(figsize=(24, 20))
+    plt.subplots_adjust(left=0.08, right=0.95, top=0.95, bottom=0.05, wspace=0.3, hspace=0.5)
+    gs = GridSpec(9, 2)
+    for k, data in inputs.items():
+        ax = plt.subplot(gs[data['gs'][0][0]:data['gs'][0][1], data['gs'][1][0]:data['gs'][1][1]])
+        plt.title(k, fontsize=params['fontsizes']['title'])
+        plt.imshow(data['r'], aspect='auto', cmap='myReds', extent=ext_rates)
+        # adjust plot
+        plt.grid()
+        ax.get_xaxis().set_visible(False)
+        for label in ax.get_yticklabels():
+            label.set_fontsize(params['fontsizes']['axes'])
+        if k.startswith('bars above'):
+            plt.ylabel('Time relative to saccade onset (ms)', fontsize=params['fontsizes']['axes'], labelpad=15)            
+        # add colorbar
+        if 'cbar' in data:
+            cbaxes = fig.add_axes(data['cbar'])  # position for the colorbar
+            cbar = plt.colorbar(cax=cbaxes)
+            cbar.set_ticks(np.arange(0, np.max(data['r']), 0.1))
+            cbar.ax.tick_params(labelsize=params['fontsizes']['axes'])
+    
+    # setup
+    # axes limits for setup plot
+    ymin = -params['range_v']
+    ymax = params['range_v']
+    # offset and vertical alignment for textual labels of points
+    offset = 2*np.sign(AP[1])
+    if np.sign(AP[1]) == -1:
+        vAlign = ['top', 'bottom']
+    else:
+        vAlign = ['bottom', 'top']
+    for i in range(2):        
+        ax = plt.subplot(gs[8, i])
+        # fixation point
+        plt.scatter(FP[0], FP[1], marker='o', s=200, color='black')
+        plt.text(FP[0], FP[1]-offset, 'FP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment=vAlign[0])
+        # saccade target
+        plt.scatter(ST[0], ST[1], marker='o', edgecolor='black', facecolor='white', s=200)
+        plt.scatter(ST[0], ST[1], marker='o', edgecolor='black', facecolor='black', s=20)
+        plt.text(ST[0], ST[1]-offset, 'ST', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment=vAlign[0])
+        # attention position            
+        plt.scatter(AP[0], AP[1], marker='o', s=200, color='black')
+        plt.text(AP[0], AP[1]+offset, 'AP', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment=vAlign[1])
+        # # remapped attention position
+        # plt.scatter(RAP[0], RAP[1], marker='o', s=200, color='gray')
+        # plt.text(RAP[0], RAP[1]+offset, 'RAP', color='gray', fontsize=params['fontsizes']['text'], horizontalalignment='center', verticalalignment=vAlign[1])
+        # saccade
+        plt.arrow(FP[0], FP[1], saccade[0], saccade[1], color='black', head_width=2, head_length=1.5, length_includes_head=True)
+        # bars
+        for b, bar in bars.items():
+            t_start = np.argwhere(bar!=np.inf)[0][0]
+            plt.scatter(bars[b][t_start][0], bars[b][t_start][1], marker='|', s=200, facecolor='gray')
+        # ax.set_aspect(1/3)
+        ax.set_xlim((ext_rates[0], ext_rates[1]))
+        ax.set_ylim((ymax+5, ymin-5))
+        ax.get_yaxis().set_visible(False)
+        for pos in ['top', 'right', 'left']:
+            ax.spines[pos].set_visible(False)
+        plt.xlabel('Horizontal position (deg)', fontsize=params['fontsizes']['axes'], labelpad=10)
+        for label in ax.get_xticklabels():
+            label.set_fontsize(params['fontsizes']['axes'])       
+
+    # plt.show()
+    plt.savefig(f"../{params['ResultDir']}/figs/Fig2C_trial={trial}.png")
+    plt.close(fig)
+
+
 def plot_setup_simple(attTask, AP, neuron, trick_colorbar=False):
     '''
     plot setup including fixation point (FP), saccade target (ST), attention position (AP)
@@ -226,7 +330,7 @@ def plot_setup_simple(attTask, AP, neuron, trick_colorbar=False):
 
 def plot_actLIP():
     '''
-    Figure 3 and 6:
+    Figure 3 and 8:
     pot activity of projection from both LIP maps to V4L4 individually as well as their sum
     normalized over all runs, for each AP separately
     '''
@@ -347,26 +451,27 @@ def plot_revCorrelation(layer):
 
     neurons, APs, tasks, control = getData()
     
-    onsetPos = load_dict_from_hdf5(f"../{params['ResultDir']}/extractedData/{layer}.hdf5")
+    onsetPos = load_dict_from_hdf5(f"../{params['ResultDir']}/extractedData/{layer}_onsetPos.hdf5")
 
 
     # one figure for each attention position
-    for AP in APs.values():
+    for AP_str, val in onsetPos.items():
+        AP = np.fromstring(AP_str[1:-1], dtype=float, sep=' ')
 
         fig = plt.figure(figsize=(12, 15))
         plt.subplots_adjust(hspace=0.4, top=0.95, bottom=0.05, right=0.95)
 
         for i, (cond, neuronPerAP) in enumerate(tasks.items()):
             # corresponding neuron in attention task (AU or UA) and control neuron
-            neuron_att = neuronPerAP[str(AP)]
-            neuron_control = control[cond][str(AP)]
+            neuron_att = neuronPerAP[AP_str]
+            neuron_control = control[cond][AP_str]
             # is this neurons above or below?
             pos_v_att = list(neurons.keys())[list(neurons.values()).index(neuron_att)].split(' ')[0]
             pos_v_control = list(neurons.keys())[list(neurons.values()).index(neuron_control)].split(' ')[0]
 
             # firing rates for all possible combinations of bar positions and onsets for this neuron
-            onsetPos_att = onsetPos[str(AP)][str(neuron_att)][pos_v_att]
-            onsetPos_control = onsetPos[str(AP)][str(neuron_control)][pos_v_control]
+            onsetPos_att = val[str(neuron_att)][pos_v_att]
+            onsetPos_control = val[str(neuron_control)][pos_v_control]
             # reduce noise and bound to 0 (lower bound), no upper bound
             onsetPos_att = np.clip(onsetPos_att - np.max(onsetPos_control)/2, 0, np.inf)
             onsetPos_control = np.clip(onsetPos_control - np.max(onsetPos_control)/2, 0, np.inf)
@@ -450,48 +555,34 @@ def plot_revCorrelation(layer):
 
 def plot_actV4L4():
     '''
-    Figure 5 and 7:
+    Figure 5, 7 and 9:
     averaged activity of V4, L4 neurons for the three different tasks (AU, UA, UU)
     '''
 
     # all possible onsets of bar
+    binsize = params['range_t'][2]
     onsets = np.arange(params['range_t'][0], params['range_t'][1]+1, params['range_t'][2])
     # saccade onset
     sacOnset = params['saccOnset']
 
-    neurons, APs, tasks, control = getData()
+    _, APs, tasks, control = getData()
 
     ## y-axis for both subplots
-    ylim = [[0, 10], [-0.5, 4.5]]
+    ylim = [[0, 0.06], [-0.03, 0.03]]
     
 
-    ## get averaged activity
-    onsetPos = load_dict_from_hdf5(f"../{params['ResultDir']}/extractedData/r_V4L4.hdf5")
-    avgAct = {'AU': np.zeros(len(onsets)), 'UA': np.zeros(len(onsets)), 'UU': np.zeros(len(onsets))}
-    for cond, neuronPerAP in tasks.items():
-        # AU and UA
-        for AP, neuron in neuronPerAP.items():
-            # is this neurons above or below?
-            pos_v = list(neurons.keys())[list(neurons.values()).index(neuron)].split(' ')[0]
-            
-            # firing rates for all possible combinations of bar positions and onsets for this neuron
-            # summed over all positions
-            avgAct[cond] += onsetPos[str(AP)][str(neuron)][pos_v].sum(axis=0)
-        # normalize
-        avgAct[cond] /= len(neuronPerAP)
-    # UU
-    count = 0
-    for cond, neuronPerAP in control.items():
-        for AP, neuron in neuronPerAP.items():
-            # is this neurons above or below?
-            pos_v = list(neurons.keys())[list(neurons.values()).index(neuron)].split(' ')[0]
-            
-            # firing rates for all possible combinations of bar positions and onsets for this neuron
-            # summed over all positions
-            avgAct['UU'] += onsetPos[str(AP)][str(neuron)][pos_v].sum(axis=0)
-            count += 1
-    # normalize
-    avgAct['UU'] /= count
+    ## get averaged activity over defined time window shifted over whole simulation time
+    # and stack results for all trials
+    rates = load_dict_from_hdf5(f"../{params['ResultDir']}/extractedData/r_V4L4_rates.hdf5")
+    avgAct = {'AU': np.empty((0, len(onsets))), 'UA': np.empty((0, len(onsets))), 'UU': np.empty((0, len(onsets)))}
+    for AP, data in rates.items():
+        for cond, r in data.items():
+            # bin
+            r_binned = np.empty((r.shape[0], len(onsets)))
+            for t in range(params['range_t'][0], params['range_t'][1]+1, binsize):
+                r_binned[:, (t-params['range_t'][0])//binsize] = np.mean(r[:, t:t+binsize], axis=1)
+            # summarize UU_AU and UU_UA into single UU
+            avgAct[cond[:2]] = np.vstack((avgAct[cond[:2]], r_binned))
 
 
     ## plot
@@ -505,7 +596,10 @@ def plot_actV4L4():
     ax = plt.subplot(gs[:3, :-1])
     for cond, v in avgAct.items():
         # averaged V4 responses
-        plt.plot(v, color=params[cond]['color'], label=cond, linewidth=3)
+        mean = np.nanmean(v, axis=0)
+        std = np.nanvar(v, axis=0)
+        plt.plot(mean, color=params[cond]['color'], label=cond, linewidth=3)
+        plt.fill_between(range(len(mean)), mean-std, mean+std, color=params[cond]['color'], alpha=0.2)
     # saccade onset
     plt.plot([lineSacOnset, lineSacOnset], ylim[0], 'black')
     # adjust plot
@@ -523,7 +617,35 @@ def plot_actV4L4():
     # subplot of normalized averaged responses for all three conditions
     ax = plt.subplot(gs[3:, :-1])
     for cond in ['AU', 'UA']:
-        plt.plot(avgAct[cond]-avgAct['UU'], color=params[cond]['color'], linestyle='--', label=cond, linewidth=3)
+        v = (avgAct[cond]-np.nanmean(avgAct['UU'], axis=0))
+        mean = np.nanmean(v, axis=0)
+        std = np.nanvar(v, axis=0)
+        plt.plot(mean, color=params[cond]['color'], linestyle='--', label=cond, linewidth=3)
+        plt.fill_between(range(len(mean)), mean-std, mean+std, color=params[cond]['color'], alpha=0.2)
+        ## print state change
+        # test, if mean significantly greater than 0
+        pVals = []
+        for v_t in v.T:
+            res = pingouin.ttest(v_t, 0, alternative='greater')
+            pVals.append(res['p-val'])
+        # correct p-values due to multiple pairs
+        pVals_corr = pingouin.multicomp(pVals, method='fdr_bh')
+        # check for change in three consecutive bins
+        changed = False
+        i = 0            
+        while not changed and i < len(pVals_corr[0])-2:
+            # AU: mean change from >0 to 0, UA: mean change from 0 to >0
+            if (cond == 'AU' and (not (pVals_corr[0][i] or pVals_corr[0][i+1] or pVals_corr[0][i+2]))) \
+                or (cond == 'UA' and (pVals_corr[0][i] and pVals_corr[0][i+1] and pVals_corr[0][i+2])):
+                changed = True
+            else:
+                i += 1
+        if changed:
+            i -= cond=='UA'
+            t_change = onsets[i]-sacOnset
+            print(f"{cond} {'off' if cond=='AU' else 'on'}: {t_change}ms")
+            plt.arrow(i, ylim[1][0]/5, 0, -ylim[1][0]/5, color=params[cond]['color'],
+                        head_width=0.1, head_length=-ylim[1][0]/10, length_includes_head=True, linewidth=2)
     # saccade onset
     plt.plot([lineSacOnset, lineSacOnset], ylim[1], 'black')
     # zero
@@ -564,9 +686,8 @@ def plot_actAll():
     averaged activity of all rates and stuff for the three different tasks (AU, UA, UU)
     '''
 
-    # all possible horizontal positions of bar
-    pos_h = np.arange(-params['VF_Deg'][0]/2, params['VF_Deg'][0]/2+params['range_h'], params['range_h'])
     # all possible onsets of bar
+    binsize = params['range_t'][2]
     onsets = np.arange(params['range_t'][0], params['range_t'][1]+1, params['range_t'][2])
     # saccade onset
     sacOnset = params['saccOnset']
@@ -577,34 +698,17 @@ def plot_actAll():
 
     for i, layer in enumerate(['r_V1', 'E_V4L4', 'ASP_V4L4', 'AFEAT_V4L4', 'sum(A_LIPpc)_V4L4', 'sum(A_LIPcd)_V4L4', 'ALIP_V4L4', 'r_V4L4']):
     
-        onsetPos = load_dict_from_hdf5(f"../{params['ResultDir']}/extractedData/{layer}.hdf5")
-
-        ## get averaged activity
-        avgAct = {'AU': np.zeros(len(onsets)), 'UA': np.zeros(len(onsets)), 'UU': np.zeros(len(onsets))}
-        for cond, neuronPerAP in tasks.items():
-            # AU and UA
-            for AP, neuron in neuronPerAP.items():
-                # is this neurons above or below?
-                pos_v = list(neurons.keys())[list(neurons.values()).index(neuron)].split(' ')[0]
-                
-                # firing rates for all possible combinations of bar positions and onsets for this neuron
-                # summed over all positions
-                avgAct[cond] += onsetPos[str(AP)][str(neuron)][pos_v].sum(axis=0)
-            # normalize
-            avgAct[cond] /= len(neuronPerAP)
-        # UU
-        count = 0
-        for cond, neuronPerAP in control.items():
-            for AP, neuron in neuronPerAP.items():
-                # is this neurons above or below?
-                pos_v = list(neurons.keys())[list(neurons.values()).index(neuron)].split(' ')[0]
-                
-                # firing rates for all possible combinations of bar positions and onsets for this neuron
-                # summed over all positions
-                avgAct['UU'] += onsetPos[str(AP)][str(neuron)][pos_v].sum(axis=0)
-                count += 1
-        # normalize
-        avgAct['UU'] /= count
+        ## get averaged activity over defined time window shifted over whole simulation time
+        # and stack results for all trials
+        rates = load_dict_from_hdf5(f"../{params['ResultDir']}/extractedData/{layer}_rates.hdf5")
+        avgAct = {'AU': np.empty((0, len(onsets))), 'UA': np.empty((0, len(onsets))), 'UU': np.empty((0, len(onsets)))}
+        for AP, data in rates.items():
+            for cond, r in data.items():
+                # bin
+                r_binned = np.empty((r.shape[0], len(onsets)))
+                for t in range(params['range_t'][0], params['range_t'][1]+1, binsize):
+                    r_binned[:, (t-params['range_t'][0])//binsize] = np.mean(r[:, t:t+binsize], axis=1)
+                avgAct[cond[:2]] = np.vstack((avgAct[cond[:2]], r_binned))
 
 
         ## plot
@@ -614,7 +718,10 @@ def plot_actAll():
         # subplot of averaged responses for all three conditions
         for cond, v in avgAct.items():
             # averaged V4 responses
-            plt.plot(v, color=params[cond]['color'], label=cond, linewidth=2)
+            mean = np.nanmean(v, axis=0)
+            std = np.nanvar(v, axis=0)
+            plt.plot(mean, color=params[cond]['color'], label=cond, linewidth=2)
+            plt.fill_between(range(len(mean)), mean-std, mean+std, color=params[cond]['color'], alpha=0.2)
         # saccade onset
         plt.plot([lineSacOnset, lineSacOnset], ax.get_ylim(), 'black')
         # adjust plot
@@ -858,4 +965,4 @@ def plot_ratesOverTime(trial, **kwargs):
         pool.close()
 
         ## create movie out of png sequence
-        os.system(f"ffmpeg -framerate 20 -i ../{params['ResultDir']}/figs/Fig9/%03d.png ../{params['ResultDir']}/figs/Fig9/movie.mp4")
+        os.system(f"ffmpeg -framerate 20 -i '../{params['ResultDir']}/figs/Fig9/%03d.png' '../{params['ResultDir']}/figs/Fig9/movie.mp4'")

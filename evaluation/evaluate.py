@@ -11,7 +11,7 @@ Main script for evaluation
 import os
 import sys
 # import files from this folder
-from processData import getTrialsPerAP, getBarposAndOnsetCombinations, extract_eyepos, extract_LIPdata, extract_onsetPos
+from processData import getTrialsPerAP, getBarposAndOnsetCombinations, extract_eyepos, extract_LIPdata, extract_onsetPos, extract_rates
 from plotting import plot_setup, plot_revCorrelation, plot_actLIP, plot_actV4L4, plot_actAll, plot_ratesOverTime
 # parameters
 from parameters.params_general import params
@@ -41,10 +41,12 @@ if __name__ == "__main__":
 
     print(f"extract rates of layer V4L4")
     extract_onsetPos('r_V4L4')
-    # additional evaluation for sub results
+    extract_rates('r_V4L4')
+    # # additional evaluation for sub results
     # for layer in ['r_V1', 'E_V4L4', 'ALIP_V4L4', 'ASP_V4L4', 'AFEAT_V4L4', 'sum(A_LIPpc)_V4L4', 'sum(A_LIPcd)_V4L4']:
     #    print(f"extract data of layer {layer}")
     #    extract_onsetPos(layer)
+    #    extract_rates(layer)
 
 
     ## plotting
@@ -58,24 +60,24 @@ if __name__ == "__main__":
     else:
         trial = 1
 
-    # Figure 2
+    # Figure 2 and S2
     plot_setup(trial)
 
-    # Figure 3 and 6
+    # Figure 3 and 8
     plot_actLIP()
 
     # Figure 4
     plot_revCorrelation('r_V4L4')
-    # additional plots for sub results
+    # # additional plots for sub results
     # for layer in ['r_V1', 'E_V4L4', 'ALIP_V4L4', 'ASP_V4L4', 'AFEAT_V4L4', 'sum(A_LIPpc)_V4L4', 'sum(A_LIPcd)_V4L4']:
     #     print(f"plot reverse correlation of layer {layer}")
     #     plot_revCorrelation(layer)
 
-    # Figure 5 and 7
+    # Figure 5, 7 and 9
     plot_actV4L4()
-    # additional plots for sub results
+    # # additional plots for sub results
     # plot_actAll()
 
-    # Figure 9
+    # Figure S3
     plot_ratesOverTime(trial)
     plot_ratesOverTime(trial, timesteps=[0, 50, 300, 350, 417, 500, 700])
