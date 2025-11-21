@@ -34,6 +34,11 @@ With script run.sh all the steps are run in the correct order at once.
   * SaccGen.py (generates saccade after Van Wetter & Van Opstal (2008))
   * saving.py (auxiliary functions for saving data)
 
+## Reproducibility
+The neurocomputational model itself is deterministic. Only the different trials are generated randomized. Thus, running the scripts will produce nearly the same results as presented in the paper. 
+
+Nevertheless, if you want to reproduce identical results compared to the ones of the paper, please use the provided data in the releases.
+
 
 ## Dependencies
 
