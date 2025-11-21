@@ -4,9 +4,9 @@ trial=1
 AP="[ 0. -7.]"
 echo "Start simulation with fixed attention position at $AP."
 # 1. generate sup-setup for all trials with given AP
-python3 extractSubSetup.py "$AP"
+# python3 extractSubSetup.py "$AP"
 # 2. simulate one specific trial to record more data (e.g. to plot setup or rates later)
-python3 main_singleTrial.py $trial "$AP"
+# python3 main_singleTrial.py $trial "$AP"
 # 3. simulate all (previously) generated trials
 python3 main.py -1 "$AP"
 echo "Finished simulation."

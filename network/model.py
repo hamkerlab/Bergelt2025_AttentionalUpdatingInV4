@@ -13,6 +13,7 @@ Definition of neuro-computational model with ANNarchy
 ##############################
 import os
 import numpy as np
+import pandas as pd
 
 from ANNarchy import Neuron, Population, TimedArray, Projection
 from ANNarchy.extensions.convolution import Pooling, Convolution
@@ -26,6 +27,12 @@ from network.connections import gaussian2dTo4d_h, gaussian2dTo4d_v, gaussian2dTo
 from parameters.params_model import params as params_model
 from parameters.params_general import params
 params.update(params_model)
+
+# manipulate parameters
+df = pd.read_json("parameters/param_variations.json", orient="records", lines=True)
+print(f"USE VARIATION {params['var_num']}")
+params_new = (df.iloc[params['var_num']]).to_dict()
+params.update(params_new)
 
 
 ##########################################

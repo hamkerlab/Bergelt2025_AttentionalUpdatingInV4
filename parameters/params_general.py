@@ -33,9 +33,11 @@ if len(sys.argv) > 2:
   AP = sys.argv[2]
 else:
   AP = '[ 0. -7.]'
-params['ResultDir'] = f'Results/attType_{AP}/'
+# parameter variation
+params['var_num'] = 0
+params['ResultDir'] = f"Results/paramVariation/{params['var_num']}/"
 params['SetupDir'] = f'Results/setup_{AP}/'
-params['ConnDir'] = 'network/connections/'
+params['ConnDir'] = f"network/connections/paramVariation/{params['var_num']}/"
 
 
 ######################

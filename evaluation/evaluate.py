@@ -30,11 +30,11 @@ if __name__ == "__main__":
     print("extract eye position")
     extract_eyepos()
 
-    print("get trials per attention position")
-    trialsPerAP = getTrialsPerAP()
+    # print("get trials per attention position")
+    # trialsPerAP = getTrialsPerAP()
 
-    print("get all bar onset and position combinations")
-    getBarposAndOnsetCombinations()
+    # print("get all bar onset and position combinations")
+    # getBarposAndOnsetCombinations()
 
     print("extract LIP data")
     extract_LIPdata()
@@ -54,14 +54,14 @@ if __name__ == "__main__":
     if not os.path.isdir(f"../{params['ResultDir']}/figs/"):
         os.makedirs(f"../{params['ResultDir']}/figs/")
 
-    # id of trial to plot
-    if len(sys.argv) > 1:
-        trial = sys.argv[1]
-    else:
-        trial = 1
+    # # id of trial to plot
+    # if len(sys.argv) > 1:
+    #     trial = sys.argv[1]
+    # else:
+    #     trial = 1
 
-    # Figure 2 and S2
-    plot_setup(trial)
+    # # Figure 2 and S2
+    # plot_setup(trial)
 
     # Figure 3 and 8
     plot_actLIP()
@@ -77,9 +77,9 @@ if __name__ == "__main__":
     plot_actV4L4()
     # # additional plots for sub results
     # plot_actAll()
-    # # Figure 6 and 10 (only for parameter variation)
-    # plot_actV4L4_variation()
+    # Figure 6 and 10 (only for parameter variation)
+    plot_actV4L4_variation()
 
-    # Figure S3
-    plot_ratesOverTime(trial)
-    plot_ratesOverTime(trial, timesteps=[0, 50, 300, 350, 417, 500, 700])
+    # # Figure S3
+    # plot_ratesOverTime(trial)
+    # plot_ratesOverTime(trial, timesteps=[0, 50, 300, 350, 417, 500, 700])

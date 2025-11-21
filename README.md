@@ -31,13 +31,21 @@ With script run.sh all the steps are run in the correct order at once.
   * helper.py (auxiliary functions)
   * main_singleTrial.py (simulate one (specified) trial and record many data)
   * main.py (simulate all trials and record only needed data)
+  * paramtest.py (create different parameter sets and set the correct parameter set for current simulation)
   * run.sh (script running all files in correct order at once)
+  * run_paramVariation.sh (script running all files in correct order at once - for parameter variation)
   * SaccGen.py (generates saccade after Van Wetter & Van Opstal (2008))
   * saving.py (auxiliary functions for saving data)
 
 ## Parameter variation (Test for model robustness)
 
 Use only simulations with AP above FP (at [ 0. -7.]). 998 trials in total.
+
+Defined 60 changeable parameters (model parameters for ODEs and connections, no FEF parameters, no input parameters) and create 1000 parameter sets, each varied all 60 parameters (uniformly between -5% and +5%) independently.
+
+Run the 998 trials (with fixed AP) with each parameter sets and evaluate the V4 activity.
+
+Use script run_paramVariation.sh to run everything in the correct order at once.
 
 
 

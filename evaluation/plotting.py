@@ -746,7 +746,7 @@ def plot_actV4L4_variation():
                 else:
                     labeltext = None
             else:
-                labeltext = f"{cond}, {int(label)-sacOnset}ms"
+                labeltext = f"{cond}, {label}"
             plt.plot(mean, color=plt.get_cmap(params[cond]['cmap'])((trial+1)/len(avgAct_variations)), label=labeltext, linewidth=3)
             # plt.fill_between(range(len(mean)), mean-std, mean+std, color=plt.get_cmap(params[cond]['cmap'])((trial+1)/len(avgAct_variations)), alpha=0.2)
     # saccade onset
@@ -778,7 +778,7 @@ def plot_actV4L4_variation():
                 else:
                     labeltext = None
             else:
-                labeltext = f"{cond}, {int(label)-sacOnset}ms"
+                labeltext = f"{cond}, {label}"
             plt.plot(mean, color=plt.get_cmap(params[cond]['cmap'])((trial+1)/len(avgAct_variations)), linestyle='--', label=labeltext, linewidth=3)
             # plt.fill_between(range(len(mean)), mean-std, mean+std, color=plt.get_cmap(params[cond]['cmap'])((trial+1)/len(avgAct_variations)), alpha=0.2)
             if len(avgAct_variations) <= 5:
@@ -803,7 +803,7 @@ def plot_actV4L4_variation():
                 if changed:
                     i -= cond=='UA'
                     t_change = onsets[i]-sacOnset
-                    print(f"turn off {int(label)-sacOnset}ms before saccade onset: {cond} {'off' if cond=='AU' else 'on'} at {t_change}ms")
+                    print(f"{label}: {cond} {'off' if cond=='AU' else 'on'} at {t_change}ms")
     # saccade onset
     plt.plot([lineSacOnset, lineSacOnset], ylim[1], 'black')
     # zero
