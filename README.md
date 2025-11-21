@@ -25,6 +25,7 @@ With script run.sh all the steps are run in the correct order at once.
     * params_general.py (defining general parameters like where to save, number of trials, ...)
     * params_model.py (defining model parameters including neuronal, connection and input parameters, layer sizes, ...)
     * param_plotting.py (defining parameters used for generating figures)
+  * extractSubSetup.py (extract sub-trials of already existing setup trials for one given, fixed attention position)
   * generateSetup.py (generates setup for all trials including stimulus inputs and eye movement, run in advance)
   * generateSignals.py (generates input signals out of given setup)
   * helper.py (auxiliary functions)
@@ -34,12 +35,10 @@ With script run.sh all the steps are run in the correct order at once.
   * SaccGen.py (generates saccade after Van Wetter & Van Opstal (2008))
   * saving.py (auxiliary functions for saving data)
 
-## Parameter variation (Investigate fading top-down attention pointer)
+## Parameter variation (Test for model robustness)
 
-Vary time point of turning off top-down attention input: -150ms, -100ms (original phasic), -50ms, and 50ms relative to saccade onset.
-The script run.sh is modified to run the three new variations successively. A new function for plotting V4 activities of all variations is added.
+Use only simulations with AP above FP (at [ 0. -7.]). 998 trials in total.
 
-HINT: Re-use the results with the original turnoff time (100ms before saccade onset = phasicAttention) by creating a softlink into the sub-folder of the new results.
 
 
 ## Dependencies

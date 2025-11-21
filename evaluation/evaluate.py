@@ -77,8 +77,8 @@ if __name__ == "__main__":
     plot_actV4L4()
     # # additional plots for sub results
     # plot_actAll()
-    # Figure 6 and 10 (only for parameter variation)
-    plot_actV4L4_variation()
+    # # Figure 6 and 10 (only for parameter variation)
+    # plot_actV4L4_variation()
 
     # Figure S3
     plot_ratesOverTime(trial)

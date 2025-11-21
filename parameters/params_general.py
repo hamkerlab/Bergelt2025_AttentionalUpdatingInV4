@@ -27,14 +27,14 @@ params['runInParallel'] = 50
 ################
 #### saving ####
 ################
-# turn off attention after simulation start
+# fixed attention position
 import sys
 if len(sys.argv) > 2:
-    att_offset = int(sys.argv[2])
+  AP = sys.argv[2]
 else:
-    att_offset = 250
-params['ResultDir'] = f'Results/tdAttVariation/{att_offset}/'
-params['SetupDir'] = 'Results/setup/'
+  AP = '[ 0. -7.]'
+params['ResultDir'] = f'Results/attType_{AP}/'
+params['SetupDir'] = f'Results/setup_{AP}/'
 params['ConnDir'] = 'network/connections/'
 
 
@@ -65,11 +65,11 @@ params['range_t'] = [params['saccOnset']-300,       # start of stimulus presenta
 params['saccade'] = [5, 0]
 
 # top-down attention (tonic=active for entire simulation, phasic=deactivated after 250 ms)
-params['attType'] = 'phasicAttention' #'tonicAttention' 'phasicAttention'
+params['attType'] = 'tonicAttention' #'tonicAttention' 'phasicAttention'
 if 'tonic' in params['attType']:
   # attention for entire simulation
   params['att_turnoff'] = params['tEnd']+1
 else:
   # turn off attention after simulation start
-  params['att_turnoff'] = att_offset
+  params['att_turnoff'] = 250
 params['ResultDir'] = params['ResultDir'].replace('attType', params['attType'])
