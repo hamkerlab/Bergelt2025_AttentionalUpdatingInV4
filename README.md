@@ -34,6 +34,13 @@ With script run.sh all the steps are run in the correct order at once.
   * SaccGen.py (generates saccade after Van Wetter & Van Opstal (2008))
   * saving.py (auxiliary functions for saving data)
 
+## Parameter variation (Investigate fading top-down attention pointer)
+
+Vary time point of turning off top-down attention input: -150ms, -100ms (original phasic), -50ms, and 50ms relative to saccade onset.
+The script run.sh is modified to run the three new variations successively. A new function for plotting V4 activities of all variations is added.
+
+HINT: Re-use the results with the original turnoff time (100ms before saccade onset = phasicAttention) by creating a softlink into the sub-folder of the new results.
+
 
 ## Dependencies
 

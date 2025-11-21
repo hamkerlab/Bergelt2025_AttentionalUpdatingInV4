@@ -12,7 +12,7 @@ import os
 import sys
 # import files from this folder
 from processData import getTrialsPerAP, getBarposAndOnsetCombinations, extract_eyepos, extract_LIPdata, extract_onsetPos, extract_rates
-from plotting import plot_setup, plot_revCorrelation, plot_actLIP, plot_actV4L4, plot_actAll, plot_ratesOverTime
+from plotting import plot_setup, plot_revCorrelation, plot_actLIP, plot_actV4L4, plot_actV4L4_variation, plot_actAll, plot_ratesOverTime
 # parameters
 from parameters.params_general import params
 
@@ -77,6 +77,8 @@ if __name__ == "__main__":
     plot_actV4L4()
     # # additional plots for sub results
     # plot_actAll()
+    # Figure 6 and 10 (only for parameter variation)
+    plot_actV4L4_variation()
 
     # Figure S3
     plot_ratesOverTime(trial)

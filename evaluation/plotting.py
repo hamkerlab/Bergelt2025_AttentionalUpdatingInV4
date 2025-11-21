@@ -680,6 +680,241 @@ def plot_actV4L4():
     plt.savefig(f"../{params['ResultDir']}/figs/Fig5.png", dpi=300)
     plt.close(fig)
 
+def plot_actV4L4_variation():
+    '''
+    Figure 6 and 10:
+    Figure 5 with different simulations (e. g. generated through parameter variations)
+    averaged activity of V4, L4 neurons for the three different tasks (AU, UA, UU)
+    '''
+
+    # all possible onsets of bar
+    binsize = params['range_t'][2]
+    onsets = np.arange(params['range_t'][0], params['range_t'][1]+1, params['range_t'][2])
+    # saccade onset
+    sacOnset = params['saccOnset']
+
+    _, APs, tasks, control = getData()
+
+    ## y-axis for both subplots
+    ylim = [[0, 0.06], [-0.03, 0.03]]
+
+
+    path_variations = f"../{params['ResultDir']}/../"    
+    avgAct_variations = {}
+
+    for trial in sorted(next(os.walk(path_variations))[1]):
+
+        try:
+            ## get averaged activity over defined time window shifted over whole simulation time
+            # and stack results for all trials
+            rates = load_dict_from_hdf5(f"{path_variations}/{trial}/extractedData/r_V4L4_rates.hdf5")
+            avgAct_variations[trial] = {'AU': np.empty((0, len(onsets))), 'UA': np.empty((0, len(onsets))), 'UU': np.empty((0, len(onsets)))}
+            for AP, data in rates.items():
+                for cond, r in data.items():
+                    # bin
+                    r_binned = np.empty((r.shape[0], len(onsets)))
+                    for t in range(params['range_t'][0], params['range_t'][1]+1, binsize):
+                        r_binned[:, (t-params['range_t'][0])//binsize] = np.mean(r[:, t:t+binsize], axis=1)
+                    # summarize UU_AU and UU_UA into single UU
+                    avgAct_variations[trial][cond[:2]] = np.vstack((avgAct_variations[trial][cond[:2]], r_binned))
+        except FileNotFoundError:
+            print(f"skip {trial}")
+
+    print(f"Compare {len(avgAct_variations)} variations.")
+
+
+    ## plot
+    lineSacOnset = (sacOnset-onsets[0])/(onsets[-1]-onsets[0]) * (len(onsets)-1)
+
+    ## all trials individually
+    fig = plt.figure(figsize=(24, 13.8))
+    plt.subplots_adjust(hspace=1.0, left=0.08, right=0.98, top=0.95, bottom=0.05)
+    gs = GridSpec(6, 5)
+
+    # subplot of averaged responses for all three conditions
+    ax = plt.subplot(gs[:3, :-1])
+    for trial, (label, avgAct) in enumerate(avgAct_variations.items()):
+        for cond, v in avgAct.items():
+            # averaged V4 responses
+            mean = np.nanmean(v, axis=0)
+            std = np.nanvar(v, axis=0)
+            # text for label
+            if len(avgAct_variations) > 5:
+                # cannot label everything because there are too many
+                if trial == len(avgAct_variations)//2:
+                    labeltext = f"{cond}"
+                else:
+                    labeltext = None
+            else:
+                labeltext = f"{cond}, {int(label)-sacOnset}ms"
+            plt.plot(mean, color=plt.get_cmap(params[cond]['cmap'])((trial+1)/len(avgAct_variations)), label=labeltext, linewidth=3)
+            # plt.fill_between(range(len(mean)), mean-std, mean+std, color=plt.get_cmap(params[cond]['cmap'])((trial+1)/len(avgAct_variations)), alpha=0.2)
+    # saccade onset
+    plt.plot([lineSacOnset, lineSacOnset], ylim[0], 'black')
+    # adjust plot
+    plt.title('average over neurons', fontsize=params['fontsizes']['title'])
+    plt.legend(fontsize=params['fontsizes']['legend'], loc='upper right')
+    # x-axis (bar onsets)
+    plt.xlim(0, len(onsets)-1)
+    plt.xticks([])
+    # y-axis (response of V4)
+    plt.ylim(ylim[0])
+    plt.ylabel('average response\nof V4 neurons\nover all bar positions', fontsize=params['fontsizes']['axes'])
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_fontsize(params['fontsizes']['axes'])
+
+    # subplot of normalized averaged responses for all three conditions
+    ax = plt.subplot(gs[3:, :-1])
+    for trial, (label, avgAct) in enumerate(avgAct_variations.items()):
+        for cond in ['AU', 'UA']:
+            v = (avgAct[cond]-np.nanmean(avgAct['UU'], axis=0))
+            mean = np.nanmean(v, axis=0)
+            std = np.nanvar(v, axis=0)
+            # text for label
+            if len(avgAct_variations) > 5:
+                # cannot label everything because there are too many
+                if trial == len(avgAct_variations)//2:
+                    labeltext = f"{cond}"
+                else:
+                    labeltext = None
+            else:
+                labeltext = f"{cond}, {int(label)-sacOnset}ms"
+            plt.plot(mean, color=plt.get_cmap(params[cond]['cmap'])((trial+1)/len(avgAct_variations)), linestyle='--', label=labeltext, linewidth=3)
+            # plt.fill_between(range(len(mean)), mean-std, mean+std, color=plt.get_cmap(params[cond]['cmap'])((trial+1)/len(avgAct_variations)), alpha=0.2)
+            if len(avgAct_variations) <= 5:
+                ## print state change
+                # test, if mean significantly greater than 0
+                pVals = []
+                for v_t in v.T:
+                    res = pingouin.ttest(v_t, 0, alternative='greater')
+                    pVals.append(res['p-val'])
+                # correct p-values due to multiple pairs
+                pVals_corr = pingouin.multicomp(pVals, method='fdr_bh')
+                # check for change in three consecutive bins
+                changed = False
+                i = 0            
+                while not changed and i < len(pVals_corr[0])-2:
+                    # AU: mean change from >0 to 0, UA: mean change from 0 to >0
+                    if (cond == 'AU' and (not (pVals_corr[0][i] or pVals_corr[0][i+1] or pVals_corr[0][i+2]))) \
+                        or (cond == 'UA' and (pVals_corr[0][i] and pVals_corr[0][i+1] and pVals_corr[0][i+2])):
+                        changed = True
+                    else:
+                        i += 1
+                if changed:
+                    i -= cond=='UA'
+                    t_change = onsets[i]-sacOnset
+                    print(f"turn off {int(label)-sacOnset}ms before saccade onset: {cond} {'off' if cond=='AU' else 'on'} at {t_change}ms")
+    # saccade onset
+    plt.plot([lineSacOnset, lineSacOnset], ylim[1], 'black')
+    # zero
+    plt.plot([0, len(onsets)-1], [0, 0], 'black')
+    # adjust plot
+    plt.title('normalized average over neurons', fontsize=params['fontsizes']['title'])
+    plt.legend(fontsize=params['fontsizes']['legend'], loc='upper right')
+    # x-axis (bar onsets)
+    plt.xlim(0, len(onsets)-1)
+    min_t = onsets[0]-sacOnset
+    plt.xticks([0, 0.5*lineSacOnset, lineSacOnset, 1.5*lineSacOnset, 2*lineSacOnset],
+               np.array([min_t, min_t/2, 0, -min_t/2, -min_t], dtype=int))
+    plt.xlabel('bar onset relative to saccade onset (ms)', fontsize=params['fontsizes']['axes'])
+    # y-axis (response of V4)
+    plt.ylim(ylim[1])
+    plt.ylabel('normalized average response\nof V4 neurons\nover all bar positions',
+               fontsize=params['fontsizes']['axes'])
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_fontsize(params['fontsizes']['axes'])
+
+    # setup for 3 different attention conditions (AU, UA, UU)
+    # define fixed AP for all three conditions
+    AP = APs['above FP']
+    plt.subplot(gs[:2, -1])
+    plot_setup_simple('AU', AP, tasks['AU'][str(AP)])
+    plt.subplot(gs[2:4, -1])
+    plot_setup_simple('UA', AP, tasks['UA'][str(AP)])
+    plt.subplot(gs[4:, -1])
+    plot_setup_simple('UU', AP, control['AU'][str(AP)])
+
+    # plt.show()
+    if not os.path.isdir(f"{path_variations}/figs/"):
+        os.makedirs(f"{path_variations}/figs/")
+    plt.savefig(f"{path_variations}/figs/Fig5_individual.png", dpi=300)
+    plt.close(fig)
+
+    ## mean over all trials
+    fig = plt.figure(figsize=(24, 13.8))
+    plt.subplots_adjust(hspace=1.0, left=0.08, right=0.98, top=0.95, bottom=0.05)
+    gs = GridSpec(6, 5)
+
+    # subplot of averaged responses for all three conditions
+    ax = plt.subplot(gs[:3, :-1])
+    for cond in ['AU', 'UA', 'UU']:
+        v = [None]*len(avgAct_variations)
+        for trial, (label, avgAct) in enumerate(avgAct_variations.items()):
+            v[trial] = np.nanmean(avgAct[cond], axis=0)
+        # averaged V4 responses
+        mean = np.nanmean(v, axis=0)
+        std = np.nanstd(v, axis=0)
+        plt.plot(mean, color=params[cond]['color'], label=cond, linewidth=3)
+        plt.fill_between(range(len(mean)), mean-std, mean+std, color=params[cond]['color'], alpha=0.2)
+    # saccade onset
+    plt.plot([lineSacOnset, lineSacOnset], ylim[0], 'black')
+    # adjust plot
+    plt.title('average over neurons', fontsize=params['fontsizes']['title'])
+    plt.legend(fontsize=params['fontsizes']['legend'], loc='upper right')
+    # x-axis (bar onsets)
+    plt.xlim(0, len(onsets)-1)
+    plt.xticks([])
+    # y-axis (response of V4)
+    plt.ylim(ylim[0])
+    plt.ylabel('average response\nof V4 neurons\nover all bar positions', fontsize=params['fontsizes']['axes'])
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_fontsize(params['fontsizes']['axes'])
+
+    # subplot of normalized averaged responses for all three conditions
+    ax = plt.subplot(gs[3:, :-1])
+    
+    for cond in ['AU', 'UA']:
+        v = [None]*len(avgAct_variations)
+        for trial, (label, avgAct) in enumerate(avgAct_variations.items()):
+            v[trial] = np.nanmean(avgAct[cond], axis=0) - np.nanmean(avgAct['UU'], axis=0)
+        mean = np.nanmean(v, axis=0)
+        std = np.nanstd(v, axis=0)
+        plt.plot(mean, color=params[cond]['color'], linestyle='--', label=cond, linewidth=3)
+        plt.fill_between(range(len(mean)), mean-std, mean+std, color=params[cond]['color'], alpha=0.2)
+    # saccade onset
+    plt.plot([lineSacOnset, lineSacOnset], ylim[1], 'black')
+    # zero
+    plt.plot([0, len(onsets)-1], [0, 0], 'black')
+    # adjust plot
+    plt.title('normalized average over neurons', fontsize=params['fontsizes']['title'])
+    plt.legend(fontsize=params['fontsizes']['legend'], loc='upper right')
+    # x-axis (bar onsets)
+    plt.xlim(0, len(onsets)-1)
+    min_t = onsets[0]-sacOnset
+    plt.xticks([0, 0.5*lineSacOnset, lineSacOnset, 1.5*lineSacOnset, 2*lineSacOnset],
+               np.array([min_t, min_t/2, 0, -min_t/2, -min_t], dtype=int))
+    plt.xlabel('bar onset relative to saccade onset (ms)', fontsize=params['fontsizes']['axes'])
+    # y-axis (response of V4)
+    plt.ylim(ylim[1])
+    plt.ylabel('normalized average response\nof V4 neurons\nover all bar positions',
+               fontsize=params['fontsizes']['axes'])
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_fontsize(params['fontsizes']['axes'])
+
+    # setup for 3 different attention conditions (AU, UA, UU)
+    # define fixed AP for all three conditions
+    AP = APs['above FP']
+    plt.subplot(gs[:2, -1])
+    plot_setup_simple('AU', AP, tasks['AU'][str(AP)])
+    plt.subplot(gs[2:4, -1])
+    plot_setup_simple('UA', AP, tasks['UA'][str(AP)])
+    plt.subplot(gs[4:, -1])
+    plot_setup_simple('UU', AP, control['AU'][str(AP)])
+
+    # plt.show()
+    plt.savefig(f"{path_variations}/figs/Fig5_mean.png", dpi=300)
+    plt.close(fig)
+
 def plot_actAll():
     '''
     modification of plot_actV4L4()

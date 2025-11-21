@@ -16,11 +16,11 @@ params = {}
 
 ## colors
 # AU task: attended->unattended
-params['AU'] = {'clim': 0.2, 'color': 'red'}
+params['AU'] = {'clim': 0.2, 'color': 'red', 'cmap': 'Reds'}
 # UA task: unattended->attended
-params['UA'] = {'clim': 0.2, 'color': '#5c5794ff'}
+params['UA'] = {'clim': 0.2, 'color': '#5c5794ff', 'cmap': 'Purples'}
 # UU task/control: unattended->unattended
-params['UU'] = {'color': 'black'}
+params['UU'] = {'color': 'black', 'cmap': 'Grays'}
 
 # colormap with pure white at lower values
 cdict_red = {'red':   ((0.0, 1.0, 1.0),
