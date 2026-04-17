@@ -1,12 +1,13 @@
 """
-@author: juschu
-
-saving all things generated during simulation
-
+Saving all things generated during simulation:
  - eye position
  - stimulus position
  - output data
  - firing rates and other variables
+
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
 
 

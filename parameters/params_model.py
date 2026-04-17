@@ -1,13 +1,19 @@
-# -*- coding: utf-8 -*-
 """
-@author: juschu
-
 Parameters needed to define neuro-computational model
 
  - defining model including layers, neurons and connections
  - creating input signals
  - saved in dictionary
+
+ 
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
+
+
+##############################
+#### imports and settings ####
+##############################
 import numpy as np
 
 from parameters.params_general import params

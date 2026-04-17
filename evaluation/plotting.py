@@ -1,8 +1,12 @@
 """
-@author: juschu
+Main script for plotting:
+Define figure plots based on simulated data.
 
-Main script for plotting
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
+
 
 ##############################
 #### imports and settings ####

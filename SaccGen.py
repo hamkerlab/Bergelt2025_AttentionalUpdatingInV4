@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 """
-@author: juschu
-
-saccade generator
-
+Implementation of saccade generator:
  - saccades are calculated according to VanWetter&VanOpstal-Model (VanWetter & VanOpstal, 2008)
  - calculate coordinates of eye position during saccades for each timestep
+
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
 
 

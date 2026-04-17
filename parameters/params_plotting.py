@@ -1,17 +1,24 @@
-# -*- coding: utf-8 -*-
 """
-@author: juschu
-
 Parameters needed to define appearance of figures
-
  - colors
  - fontsizes
+
+ 
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
 
+
+##############################
+#### imports and settings ####
+##############################
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
 
 
+####################
+#### parameters ####
+####################
 params = {}
 
 ## colors

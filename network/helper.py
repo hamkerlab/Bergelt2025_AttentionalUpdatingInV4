@@ -1,8 +1,11 @@
 """
-@author: juschu
+Auxiliary functions needed for defining model.
 
-auxiliary functions needed for defining model
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
+
 
 ##############################
 #### imports and settings ####

@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
 """
-@author: juschu
-
-generate input signals for different layers
-
+Generate input signals for different layers:
  - proprioceptive (PC) eye position for PC signal
  - top-down attention for Xh
  - retinal input for V1
  - corollary discharge for FEFv
+
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
 
 
@@ -16,7 +16,6 @@ generate input signals for different layers
 ##############################
 # import standard libraries
 import sys
-import math
 import numpy as np
 
 # import files from this folder

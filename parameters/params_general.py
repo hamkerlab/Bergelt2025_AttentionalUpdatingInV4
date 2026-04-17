@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-@author: juschu
-
-Parameters needed to define general things
+Parameters needed to define general things:
  - setup and layout
  - saving
  - saved in dictionary
+
+ 
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
 
 

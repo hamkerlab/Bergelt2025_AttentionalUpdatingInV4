@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 """
-@author: juschu
-
-generating set of experimental setups
+Generating set of experimental setups.
+And store generated setups.
 
 Following experiment of Marino and Mazer (2018):
  - 1 fixation point (FP), 1 saccade target (ST)
  - 1 attention position (AP) out of 4 possible positions
  - multiple random bars as stimuli at different positions above and below FP/ST
 
- - store generated setups
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
 
 

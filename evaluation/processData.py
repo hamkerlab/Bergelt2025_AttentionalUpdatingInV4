@@ -1,9 +1,12 @@
 """
-@author: juschu
+Main script for processing data from simulations:
+Preprocess simulated data needed for plotting.
 
-Main script for processing data from simulations
-needed for plotting
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
+
 
 ##############################
 #### imports and settings ####

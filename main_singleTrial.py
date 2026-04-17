@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
 """
-@author: juschu
-
-Main script to run model and simulate experiment
-
+Main script to run model and simulate experiment:
  - Run pre-defined experimental setups in parallel
  - Record activity of V4 Layer 4 as well as its inputs over time and save as hdf5
+
+Only for one trial.
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
 
 

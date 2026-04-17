@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
 """
-@author: juschu
-
-auxiliary functions
+Auxiliary functions needed for simulating and evaluation.
 
  - readout eye and stimulus position, and output data
  - map neurons to corresponding positions in visual space and vice versa
+
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
 
 

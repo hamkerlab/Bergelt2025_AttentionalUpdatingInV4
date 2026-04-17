@@ -1,8 +1,10 @@
-# -*- coding: utf-8 -*-
 """
-@author: juschu
+Defining own connection pattern:
+Define ANNarchy.CSR objects with connections after specified patterns.
 
-Defining own connection pattern
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
 
 

@@ -1,12 +1,16 @@
 """
-@author: juschu
-
 Definition of neuro-computational model with ANNarchy
 
+Define:
  - ODE of neurons
  - populations consisting of neurons
  - connections between populations
+
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
+
 
 ##############################
 #### imports and settings ####

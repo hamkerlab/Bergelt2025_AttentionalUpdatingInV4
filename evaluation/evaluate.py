@@ -1,8 +1,19 @@
 """
-@author: juschu
+Main script for evaluation:
+Preprocess simulated data and create paper's figures.
 
-Main script for evaluation
+Plot:
+ - temporal and spatial layout of given trial
+ - activity from LIP maps projected to V4
+ - reverse correlation of V4 responses
+ - averaged activity of V4 neurons
+ - activity of most important maps over time for given trial
+
+
+:copyright: Copyright 2025-today, Julia Bergelt.
+:license: MIT, see LICENSE for details.
 """
+
 
 ##############################
 #### imports and settings ####
